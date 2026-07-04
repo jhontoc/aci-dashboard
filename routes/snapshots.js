@@ -43,40 +43,47 @@ const upload = multer({
 //  GET /api/snapshots
 //  Returns a list of all snapshot metadata (filename + summary)
 // ────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────
+//  GET /api/snapshots
+//  Returns array of snapshot objects with metadata
+// ────────────────────────────────────────────────────────────
 router.get('/', (req, res) => {
-  try {
-    const files = fs
-      .readdirSync(SNAPSHOT_DIR)
-      .filter(f => f.endsWith('.json'))
-      .map(filename => {
-        const filePath = path.join(SNAPSHOT_DIR, filename);
-        const stat     = fs.statSync(filePath);
-
-        // Read just enough to extract metadata without loading full node data
-        let meta = { command: 'unknown', timestamp: '', nodeCount: 0 };
-        try {
-          const raw  = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-          meta.command   = raw.command   || 'unknown';
-          meta.timestamp = raw.timestamp || '';
-          meta.nodeCount = Object.keys(raw.nodes || {}).length;
-        } catch { /* skip malformed files */ }
-
-        return {
-          filename,
-          command:   meta.command,
-          timestamp: meta.timestamp,
-          nodeCount: meta.nodeCount,
-          sizeBytes: stat.size,
-          created:   stat.birthtime
-        };
-      })
-      .sort((a, b) => new Date(b.created) - new Date(a.created)); // newest first
-
-    res.json(files);
-  } catch (err) {
-    res.status(500).json({ error: `Failed to list snapshots: ${err.message}` });
-  }
-});
+    try {
+      const files = fs
+        .readdirSync(SNAPSHOT_DIR)
+        .filter(f => f.endsWith('.json'))
+        .map(filename => {
+          const filePath = path.join(SNAPSHOT_DIR, filename);
+          const stat     = fs.statSync(filePath);
+  
+          let command   = 'unknown';
+          let timestamp = '';
+          let nodeCount = 0;
+  
+          try {
+            const raw  = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            command    = raw.command              || 'unknown';
+            timestamp  = raw.timestamp            || '';
+            nodeCount  = Object.keys(raw.nodes || {}).length;
+          } catch { /* skip malformed */ }
+  
+          return {
+            filename,           // ← always a plain string
+            command,
+            timestamp,
+            nodeCount,
+            sizeBytes: stat.size,
+            created:   stat.birthtime.toISOString()
+          };
+        })
+        .sort((a, b) => new Date(b.created) - new Date(a.created));
+  
+      res.json(files);
+  
+    } catch (err) {
+      res.status(500).json({ error: `Failed to list snapshots: ${err.message}` });
+    }
+  });
 
 // ────────────────────────────────────────────────────────────
 //  GET /api/snapshots/:filename
