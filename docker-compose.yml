@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  aci-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aci-dashboard
+    ports:
+      - "3000:3000"
+    volumes:
+      # Persist snapshots outside the container
+      - aci_snapshots:/app/data/snapshots
+      - aci_uploads:/app/data/uploads
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - SESSION_SECRET=change-this-to-a-strong-random-secret
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  aci_snapshots:
+    driver: local
+  aci_uploads:
+    driver: local

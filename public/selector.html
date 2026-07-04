@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ACI Dashboard — Command Selector</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top Nav ── */
+    .topbar {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #58a6ff;
+    }
+
+    .topbar-meta {
+      font-size: 0.8rem;
+      color: #8b949e;
+    }
+
+    .back-link {
+      color: #58a6ff;
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+
+    /* ── Steps Indicator ── */
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 20px 0;
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      font-size: 0.82rem;
+      color: #6e7681;
+    }
+
+    .step.active { color: #58a6ff; font-weight: 600; }
+    .step.done   { color: #3fb950; }
+
+    .step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #30363d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.75rem;
+      margin-right: 7px;
+    }
+
+    .step.active .step-num { border-color: #58a6ff; color: #58a6ff; }
+    .step.done   .step-num { border-color: #3fb950; color: #3fb950; }
+
+    .step-arrow {
+      color: #30363d;
+      margin: 0 16px;
+      font-size: 1rem;
+    }
+
+    /* ── Main Layout ── */
+    .main {
+      display: flex;
+      flex: 1;
+      gap: 0;
+      max-width: 1100px;
+      width: 100%;
+      margin: 32px auto;
+      padding: 0 24px;
+    }
+
+    /* ── Command Panel ── */
+    .panel {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 28px;
+      flex: 1;
+      margin-right: 20px;
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 20px;
+    }
+
+    .command-item {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .command-item:hover { border-color: #58a6ff; background: #0f1923; }
+
+    .command-item.selected {
+      border-color: #238636;
+      background: #0a1a0d;
+    }
+
+    .command-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      accent-color: #238636;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .command-info { flex: 1; }
+
+    .command-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #c9d1d9;
+      font-family: 'Courier New', monospace;
+    }
+
+    .command-desc {
+      font-size: 0.78rem;
+      color: #6e7681;
+      margin-top: 4px;
+    }
+
+    .command-tag {
+      font-size: 0.7rem;
+      background: rgba(88,166,255,0.12);
+      color: #58a6ff;
+      border: 1px solid rgba(88,166,255,0.25);
+      border-radius: 4px;
+      padding: 2px 7px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    /* ── Terminal Panel ── */
+    .terminal-panel {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      width: 420px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .terminal-header {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .terminal-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+
+    .terminal-title {
+      font-size: 0.8rem;
+      color: #8b949e;
+      margin-left: 6px;
+    }
+
+    .terminal-output {
+      flex: 1;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      color: #3fb950;
+      overflow-y: auto;
+      min-height: 300px;
+      max-height: 420px;
+      line-height: 1.6;
+    }
+
+    .terminal-output .line-error  { color: #f85149; }
+    .terminal-output .line-info   { color: #58a6ff; }
+    .terminal-output .line-done   { color: #d29922; }
+    .terminal-output .line-finish { color: #3fb950; font-weight: bold; }
+
+    /* ── Action Bar ── */
+    .action-bar {
+      padding: 20px 28px;
+      background: #161b22;
+      border-top: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .node-summary {
+      font-size: 0.82rem;
+      color: #8b949e;
+    }
+
+    .node-summary span { color: #58a6ff; font-weight: 600; }
+
+    .btn-run {
+      background: #238636;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 11px 28px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-run:hover:not(:disabled) { background: #2ea043; }
+    .btn-run:disabled {
+      background: #21262d;
+      color: #484f58;
+      cursor: not-allowed;
+    }
+
+    .btn-compare {
+      background: #1f6feb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 11px 24px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+      margin-left: 12px;
+    }
+
+    .btn-compare:hover { background: #388bfd; }
+    .btn-compare.visible { display: flex; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Nav -->
+  <div class="topbar">
+    <div class="topbar-title">⬡ ACI Node Comparison Dashboard</div>
+    <div style="display:flex; align-items:center; gap:20px;">
+      <span class="topbar-meta" id="sessionInfo">Loading session…</span>
+      <a href="/index.html" class="back-link">← Back</a>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step done">
+      <div class="step-num">✓</div> Credentials
+    </div>
+    <div class="step-arrow">›</div>
+    <div class="step active">
+      <div class="step-num">2</div> Select Commands
+    </div>
+    <div class="step-arrow">›</div>
+    <div class="step">
+      <div class="step-num">3</div> Compare
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main">
+
+    <!-- Commands Panel -->
+    <div class="panel">
+      <div class="panel-title">Available Commands</div>
+
+      <div class="command-item" id="cmd-show_version" onclick="toggleCommand('show_version', this)">
+        <input type="checkbox" id="chk-show_version"/>
+        <div class="command-info">
+          <div class="command-name">show version</div>
+          <div class="command-desc">
+            Retrieves firmware version, model, serial number, and
+            uptime for each target node via APIC API.
+          </div>
+          <span class="command-tag">topology/node/sys</span>
+        </div>
+      </div>
+
+      <div class="command-item" id="cmd-show_interface_status" onclick="toggleCommand('show_interface_status', this)">
+        <input type="checkbox" id="chk-show_interface_status"/>
+        <div class="command-info">
+          <div class="command-name">show interface status</div>
+          <div class="command-desc">
+            Fetches all physical interface states, speed, media type,
+            and operational status for each target node.
+          </div>
+          <span class="command-tag">topology/node/sys/phys</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Terminal Panel -->
+    <div class="terminal-panel">
+      <div class="terminal-header">
+        <div class="terminal-dot" style="background:#f85149;"></div>
+        <div class="terminal-dot" style="background:#d29922;"></div>
+        <div class="terminal-dot" style="background:#3fb950;"></div>
+        <span class="terminal-title">Output — Live Stream</span>
+      </div>
+      <div class="terminal-output" id="terminalOutput">
+        <span style="color:#484f58;">Waiting for execution…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Bar -->
+  <div class="action-bar">
+    <div class="node-summary" id="nodeSummary"></div>
+    <div style="display:flex;">
+      <button class="btn-run" id="btnRun" onclick="runCommands()" disabled>
+        ▶ Run Collection
+      </button>
+      <button class="btn-compare" id="btnCompare" onclick="goToCompare()">
+        ⬡ Go to Compare →
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ── Session guard ─────────────────────────────────────────
+    const session = JSON.parse(sessionStorage.getItem('aci_session') || 'null');
+    if (!session) window.location.href = '/index.html';
+
+    document.getElementById('sessionInfo').textContent =
+      `APIC: ${session.apicIp} | Nodes: ${session.nodeIds.join(', ')}`;
+
+    document.getElementById('nodeSummary').innerHTML =
+      `Target: <span>${session.nodeIds.length} node(s)</span> — 
+       ${session.nodeIds.join(', ')}`;
+
+    // ── Command selection ─────────────────────────────────────
+    const selectedCommands = new Set();
+
+    function toggleCommand(cmd, el) {
+      const chk = document.getElementById(`chk-${cmd}`);
+      chk.checked = !chk.checked;
+
+      if (chk.checked) {
+        selectedCommands.add(cmd);
+        el.classList.add('selected');
+      } else {
+        selectedCommands.delete(cmd);
+        el.classList.remove('selected');
+      }
+
+      document.getElementById('btnRun').disabled = selectedCommands.size === 0;
+    }
+
+    // ── Run via SSE ───────────────────────────────────────────
+    let collectedSnapshots = [];
+
+    async function runCommands() {
+      if (selectedCommands.size === 0) return;
+
+      const terminal = document.getElementById('terminalOutput');
+      terminal.innerHTML = '';
+      document.getElementById('btnRun').disabled = true;
+      document.getElementById('btnCompare').classList.remove('visible');
+
+      const body = {
+        apicIp:   session.apicIp,
+        username: session.username,
+        password: session.password,
+        nodeIds:  session.nodeIds,
+        commands: [...selectedCommands]
+      };
+
+      // Use fetch + ReadableStream for SSE-like streaming over POST
+      const response = await fetch('/api/commands/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const reader   = response.body.getReader();
+      const decoder  = new TextDecoder();
+      let   buffer   = '';
+
+      function appendLine(text, cls = '') {
+        const div = document.createElement('div');
+        div.textContent = text;
+        if (cls) div.className = cls;
+        terminal.appendChild(div);
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          const cleaned = line.replace(/^data:\s*/, '').trim();
+          if (!cleaned) continue;
+
+          if (cleaned.startsWith('[ERROR]')) {
+            appendLine(cleaned, 'line-error');
+          } else if (cleaned.startsWith('[DONE]')) {
+            appendLine(cleaned, 'line-done');
+          } else if (cleaned === '[ALL_COMPLETE]') {
+            appendLine('✓ All collections complete. Snapshot saved.', 'line-finish');
+            document.getElementById('btnCompare').classList.add('visible');
+          } else {
+            try {
+              const parsed = JSON.parse(cleaned);
+              if (parsed.snapshot_saved) {
+                collectedSnapshots.push(parsed.snapshot_saved);
+                sessionStorage.setItem(
+                  'aci_last_snapshots',
+                  JSON.stringify(collectedSnapshots)
+                );
+              }
+              appendLine(JSON.stringify(parsed));
+            } catch {
+              appendLine(cleaned);
+            }
+          }
+        }
+      }
+
+      document.getElementById('btnRun').disabled = false;
+    }
+
+    function goToCompare() {
+      window.location.href = '/compare.html';
+    }
+  </script>
+</body>
+</html>

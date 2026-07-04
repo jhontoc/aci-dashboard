@@ -1,0 +1,7 @@
+node_modules
+npm-debug.log
+data/snapshots/*
+data/uploads/*
+.git
+.gitignore
+*.md

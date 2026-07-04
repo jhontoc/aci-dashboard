@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ACI Dashboard — Compare</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      flex-shrink: 0;
+    }
+
+    .topbar-left  { display: flex; align-items: center; gap: 16px; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .topbar-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #58a6ff;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+
+    .btn-load   { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+    .btn-load:hover { background: #30363d; }
+
+    .btn-live   { background: #1f6feb; color: #fff; }
+    .btn-live:hover { background: #388bfd; }
+    .btn-live:disabled { background: #21262d; color: #484f58; cursor: not-allowed; }
+
+    .btn-export { background: #21262d; color: #3fb950; border: 1px solid #238636; }
+    .btn-export:hover { background: #0a1a0d; }
+
+    .btn-back   { background: transparent; color: #8b949e; border: 1px solid #30363d; }
+    .btn-back:hover { color: #c9d1d9; }
+
+    /* ── Node Nav Bar ── */
+    #nodeNav {
+      background: #161b22;
+      border-bottom: 1px solid #30363d;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 44px;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
+    .nav-label {
+      font-size: 0.75rem;
+      color: #6e7681;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+
+    /* ── Pane Headers ── */
+    .pane-headers {
+      display: flex;
+      flex-shrink: 0;
+      border-bottom: 1px solid #30363d;
+    }
+
+    .pane-header {
+      flex: 1;
+      padding: 10px 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pane-header.left  { background: #0d1117; border-right: 1px solid #30363d; color: #d29922; }
+    .pane-header.right { background: #0d1117; color: #3fb950; }
+
+    .pane-badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .badge-snapshot { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid rgba(210,153,34,0.3); }
+    .badge-live     { background: rgba(63,185,80,0.15);  color: #3fb950; border: 1px solid rgba(63,185,80,0.3);  }
+
+    /* ── Split Pane Wrapper ── */
+    .split-wrapper {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      position: relative;
+    }
+
+    /* ── Status / Empty States ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #484f58;
+      gap: 12px;
+      font-size: 0.9rem;
+    }
+
+    .empty-icon { font-size: 2.5rem; }
+
+    /* ── Diff Summary Bar ── */
+    .diff-bar {
+      background: #161b22;
+      border-top: 1px solid #30363d;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+    }
+
+    .diff-stat { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-changed  { background: #d29922; }
+    .dot-added    { background: #3fb950; }
+    .dot-removed  { background: #f85149; }
+    .dot-match    { background: #484f58; }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title">⬡ ACI Compare</span>
+      <button class="btn btn-back" onclick="window.location.href='/selector.html'">← Back</button>
+      <button class="btn btn-load" onclick="openLoadModal()">📂 Load Snapshot</button>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-live" id="btnLive" onclick="runLive()" disabled>
+        ▶ Run Live
+      </button>
+      <button class="btn btn-export" onclick="exportSnapshot()">⬇ Export .tar</button>
+    </div>
+  </div>
+
+  <!-- Node Nav -->
+  <div id="nodeNav">
+    <span class="nav-label">Node:</span>
+    <span style="color:#484f58; font-size:0.8rem;">Load a snapshot to begin</span>
+  </div>
+
+  <!-- Pane Headers -->
+  <div class="pane-headers">
+    <div class="pane-header left">
+      <span>Historical Snapshot</span>
+      <span class="pane-badge badge-snapshot" id="snapshotLabel">Not loaded</span>
+    </div>
+    <div class="pane-header right">
+      <span>Live / New Data</span>
+      <span class="pane-badge badge-live" id="liveLabel">Not collected</span>
+    </div>
+  </div>
+
+  <!-- Split Pane -->
+  <div class="split-wrapper" id="splitWrapper">
+    <!-- Rendered by split-pane.js -->
+  </div>
+
+  <!-- Diff Summary Bar -->
+  <div class="diff-bar">
+    <div class="diff-stat"><span class="dot dot-changed"></span><span id="statChanged">0 changed</span></div>
+    <div class="diff-stat"><span class="dot dot-added"></span><span id="statAdded">0 added</span></div>
+    <div class="diff-stat"><span class="dot dot-removed"></span><span id="statRemoved">0 removed</span></div>
+    <div class="diff-stat"><span class="dot dot-match"></span><span id="statMatch">0 matching</span></div>
+  </div>
+
+  <!-- Load Snapshot Modal -->
+  <div id="loadModal" style="
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.7); z-index:100;
+    align-items:center; justify-content:center;">
+    <div style="
+      background:#161b22; border:1px solid #30363d;
+      border-radius:10px; padding:28px; width:520px; max-width:95vw;">
+      <div style="font-size:1rem; font-weight:700; color:#c9d1d9; margin-bottom:16px;">
+        Load Snapshot
+      </div>
+      <div id="snapshotList" style="
+        max-height:300px; overflow-y:auto;
+        border:1px solid #30363d; border-radius:6px;
+        background:#0d1117; padding:8px;">
+        <div style="color:#484f58; font-size:0.85rem; padding:8px;">Loading…</div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+        <button class="btn btn-back" onclick="closeLoadModal()">Cancel</button>
+        <button class="btn btn-live" id="btnConfirmLoad" onclick="confirmLoad()" disabled>
+          Load Selected
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/components/split-pane.js"></script>
+  <script src="/components/node-nav.js"></script>
+
+  <script>
+    // ── Session ───────────────────────────────────────────────
+    const session = JSON.parse(sessionStorage.getItem('aci_session') || 'null');
+
+    let snapshotData    = null;   // loaded historical JSON
+    let liveData        = null;   // freshly collected JSON
+    let currentNodeId   = null;
+    let selectedFile    = null;
+
+    // ── Load Modal ────────────────────────────────────────────
+    async function openLoadModal() {
+      document.getElementById('loadModal').style.display = 'flex';
+      const listEl = document.getElementById('snapshotList');
+      listEl.innerHTML = '<div style="color:#484f58;font-size:0.85rem;padding:8px;">Loading…</div>';
+
+      const res   = await fetch('/api/snapshots');
+      const files = await res.json();
+
+      if (files.length === 0) {
+        listEl.innerHTML = '<div style="color:#484f58;font-size:0.85rem;padding:8px;">No snapshots found.</div>';
+        return;
+      }
+
+      listEl.innerHTML = '';
+      files.forEach(file => {
+        const item = document.createElement('div');
+        item.style.cssText = `
+          padding: 10px 12px; cursor: pointer; border-radius: 5px;
+          font-size: 0.82rem; color: #c9d1d9; font-family: monospace;
+          border-bottom: 1px solid #21262d;
+        `;
+        item.textContent = file;
+        item.addEventListener('click', () => {
+          document.querySelectorAll('#snapshotList div').forEach(d => {
+            d.style.background = '';
+          });
+          item.style.background = '#0a1a24';
+          selectedFile = file;
+          document.getElementById('btnConfirmLoad').disabled = false;
+        });
+        listEl.appendChild(item);
+      });
+    }
+
+    function closeLoadModal() {
+      document.getElementById('loadModal').style.display = 'none';
+    }
+
+    async function confirmLoad() {
+      if (!selectedFile) return;
+      closeLoadModal();
+
+      const res  = await fetch(`/api/snapshots/${selectedFile}`);
+      snapshotData = await res.json();
+
+      document.getElementById('snapshotLabel').textContent =
+        selectedFile.replace('.json', '');
+
+      const nodeIds = Object.keys(snapshotData.nodes || {});
+      NodeNav.init(nodeIds, onNodeChange);
+
+      if (nodeIds.length > 0) {
+        currentNodeId = nodeIds[0];
+        renderComparison();
+      }
+
+      if (session) document.getElementById('btnLive').disabled = false;
+    }
+
+    // ── Live Run ──────────────────────────────────────────────
+    async function runLive() {
+      if (!session || !snapshotData) return;
+
+      document.getElementById('btnLive').disabled = true;
+      document.getElementById('liveLabel').textContent = 'Collecting…';
+
+      const command = snapshotData.command;
+      const nodeIds = Object.keys(snapshotData.nodes);
+
+      const response = await fetch('/api/commands/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apicIp:   session.apicIp,
+          username: session.username,
+          password: session.password,
+          nodeIds,
+          commands: [command]
+        })
+      });
+
+      const reader  = response.body.getReader();
+      const decoder = new TextDecoder();
+      let   buffer  = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          const cleaned = line.replace(/^data:\s*/, '').trim();
+          if (!cleaned) continue;
+          try {
+            const parsed = JSON.parse(cleaned);
+            if (parsed.snapshot_saved) {
+              const res2 = await fetch(`/api/snapshots/${parsed.snapshot_saved}`);
+              liveData = await res2.json();
+              document.getElementById('liveLabel').textContent =
+                parsed.snapshot_saved.replace('.json', '');
+              renderComparison();
+            }
+          } catch { /* stream lines */ }
+        }
+      }
+
+      document.getElementById('btnLive').disabled = false;
+    }
+
+    // ── Node change callback ──────────────────────────────────
+    function onNodeChange(nodeId) {
+      currentNodeId = nodeId;
+      renderComparison();
+    }
+
+    // ── Render comparison ─────────────────────────────────────
+    function renderComparison() {
+      const leftData  = snapshotData?.nodes?.[currentNodeId] ?? null;
+      const rightData = liveData?.nodes?.[currentNodeId]     ?? null;
+
+      const stats = SplitPane.render(
+        document.getElementById('splitWrapper'),
+        leftData,
+        rightData
+      );
+
+      document.getElementById('statChanged').textContent = `${stats.changed} changed`;
+      document.getElementById('statAdded').textContent   = `${stats.added} added`;
+      document.getElementById('statRemoved').textContent = `${stats.removed} removed`;
+      document.getElementById('statMatch').textContent   = `${stats.matching} matching`;
+    }
+
+    // ── Export ────────────────────────────────────────────────
+    async function exportSnapshot() {
+      if (!selectedFile) {
+        alert('Load a snapshot first to export it.');
+        return;
+      }
+      const res = await fetch('/api/snapshots/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ files: [selectedFile] })
+      });
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `aci_export_${Date.now()}.tar`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>

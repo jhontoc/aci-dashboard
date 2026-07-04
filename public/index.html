@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ACI Dashboard — Login</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 40px 48px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .logo svg { width: 36px; height: 36px; }
+
+    .logo-text {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #58a6ff;
+      letter-spacing: 0.5px;
+    }
+
+    .logo-sub {
+      font-size: 0.75rem;
+      color: #8b949e;
+      margin-top: 2px;
+    }
+
+    h1 {
+      font-size: 1.1rem;
+      color: #c9d1d9;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 12px;
+    }
+
+    /* ── Form ── */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 10px 14px;
+      color: #e6edf3;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: #58a6ff;
+      box-shadow: 0 0 0 3px rgba(88,166,255,0.12);
+    }
+
+    .hint {
+      font-size: 0.73rem;
+      color: #6e7681;
+      margin-top: 5px;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #30363d;
+      margin: 24px 0;
+    }
+
+    .section-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #58a6ff;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Button ── */
+    .btn-primary {
+      width: 100%;
+      background: #238636;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover { background: #2ea043; }
+    .btn-primary:active { background: #1a7f37; }
+
+    /* ── Error Banner ── */
+    .error-banner {
+      display: none;
+      background: rgba(248,81,73,0.12);
+      border: 1px solid #f85149;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      color: #f85149;
+      margin-bottom: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- Logo -->
+    <div class="logo">
+      <svg viewBox="0 0 36 36" fill="none">
+        <circle cx="18" cy="18" r="17" stroke="#58a6ff" stroke-width="2"/>
+        <path d="M10 22 Q18 10 26 22" stroke="#58a6ff" stroke-width="2.5"
+              fill="none" stroke-linecap="round"/>
+        <circle cx="18" cy="20" r="3" fill="#58a6ff"/>
+      </svg>
+      <div>
+        <div class="logo-text">ACI Dashboard</div>
+        <div class="logo-sub">Node Comparison Tool</div>
+      </div>
+    </div>
+
+    <h1>Connect to APIC</h1>
+
+    <!-- Error Banner -->
+    <div class="error-banner" id="errorBanner"></div>
+
+    <form id="loginForm" novalidate>
+
+      <!-- APIC Section -->
+      <div class="section-label">APIC Connection</div>
+
+      <div class="form-group">
+        <label for="apicIp">APIC IP Address</label>
+        <input type="text" id="apicIp" placeholder="e.g. 10.0.0.1" autocomplete="off" required />
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="admin" autocomplete="off" required />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required />
+      </div>
+
+      <hr class="divider"/>
+
+      <!-- Node Section -->
+      <div class="section-label">Target Nodes</div>
+
+      <div class="form-group">
+        <label for="nodeIds">Node IDs</label>
+        <input type="text" id="nodeIds"
+               placeholder="e.g. 101,102 or 101-105 or 101,103-106"
+               autocomplete="off" required />
+        <div class="hint">
+          Accepts single IDs (101), ranges (101-105), or mixed (101,103-106)
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">
+        <span>Next — Select Commands</span>
+        <span>→</span>
+      </button>
+
+    </form>
+  </div>
+
+  <script>
+    // ── Node ID range parser ──────────────────────────────────
+    function parseNodeIds(input) {
+      const result = new Set();
+      const parts  = input.split(',').map(s => s.trim()).filter(Boolean);
+
+      for (const part of parts) {
+        if (part.includes('-')) {
+          const [start, end] = part.split('-').map(Number);
+          if (isNaN(start) || isNaN(end) || start > end) {
+            throw new Error(`Invalid range: "${part}"`);
+          }
+          for (let i = start; i <= end; i++) result.add(String(i));
+        } else {
+          const n = Number(part);
+          if (isNaN(n)) throw new Error(`Invalid node ID: "${part}"`);
+          result.add(String(n));
+        }
+      }
+      return [...result];
+    }
+
+    // ── Form submit ───────────────────────────────────────────
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const errorBanner = document.getElementById('errorBanner');
+      errorBanner.style.display = 'none';
+
+      const apicIp   = document.getElementById('apicIp').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const nodeRaw  = document.getElementById('nodeIds').value.trim();
+
+      // Basic validation
+      if (!apicIp || !username || !password || !nodeRaw) {
+        errorBanner.textContent = 'All fields are required.';
+        errorBanner.style.display = 'block';
+        return;
+      }
+
+      let nodeIds;
+      try {
+        nodeIds = parseNodeIds(nodeRaw);
+        if (nodeIds.length === 0) throw new Error('No valid node IDs found.');
+      } catch (err) {
+        errorBanner.textContent = `Node ID error: ${err.message}`;
+        errorBanner.style.display = 'block';
+        return;
+      }
+
+      // Store in sessionStorage — credentials never written to disk
+      sessionStorage.setItem('aci_session', JSON.stringify({
+        apicIp, username, password, nodeIds
+      }));
+
+      window.location.href = '/selector.html';
+    });
+  </script>
+</body>
+</html>
