@@ -29,58 +29,55 @@
       flex-shrink: 0;
     }
 
-    .topbar-left  { display: flex; align-items: center; gap: 12px; }
-    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .topbar-left  { display: flex; align-items: center; gap: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
     .topbar-title { font-size: 0.95rem; font-weight: 700; color: #58a6ff; }
 
-    /* ── Buttons ── */
     .btn {
-      border: none;
-      border-radius: 6px;
-      padding: 7px 14px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 0.2s;
-      white-space: nowrap;
+      border: none; border-radius: 6px;
+      padding: 7px 14px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center;
+      gap: 6px; transition: background 0.2s; white-space: nowrap;
     }
 
     .btn-load   { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
     .btn-load:hover { background: #30363d; }
-
-    .btn-live   { background: #1f6feb; color: #fff; border: none; }
-    .btn-live:hover:not(:disabled) { background: #388bfd; }
-    .btn-live:disabled {
-      background: #21262d; color: #484f58;
-      cursor: not-allowed; border: 1px solid #30363d;
-    }
-
     .btn-export { background: #21262d; color: #3fb950; border: 1px solid #238636; }
     .btn-export:hover { background: #0a1a0d; }
-
     .btn-back   { background: transparent; color: #8b949e; border: 1px solid #30363d; }
-    .btn-back:hover { color: #c9d1d9; border-color: #8b949e; }
-
+    .btn-back:hover { color: #c9d1d9; }
+    .btn-cancel { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+    .btn-cancel:hover { background: #30363d; }
     .btn-confirm {
       background: #238636; color: #fff; border: none;
     }
     .btn-confirm:hover:not(:disabled) { background: #2ea043; }
     .btn-confirm:disabled {
-      background: #21262d; color: #484f58;
-      cursor: not-allowed;
+      background: #21262d; color: #484f58; cursor: not-allowed;
     }
 
-    .btn-cancel { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
-    .btn-cancel:hover { background: #30363d; color: #c9d1d9; }
+    /* ── Snapshot info bar ── */
+    .info-bar {
+      background: #0d1117;
+      border-bottom: 1px solid #30363d;
+      padding: 6px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.75rem;
+      color: #6e7681;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .info-bar .info-item { display: flex; align-items: center; gap: 5px; }
+    .info-bar .info-val  { color: #c9d1d9; font-weight: 600; }
 
     /* ── Node Nav Bar ── */
     #nodeNav {
       background: #161b22;
       border-bottom: 1px solid #30363d;
-      padding: 0 20px;
+      padding: 0 16px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -90,62 +87,12 @@
     }
 
     .nav-label {
-      font-size: 0.75rem; color: #6e7681;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-right: 4px;
-      white-space: nowrap;
+      font-size: 0.72rem; color: #6e7681;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-right: 4px; white-space: nowrap;
     }
 
-    /* ── Pane Headers ── */
-    .pane-headers {
-      display: flex;
-      flex-shrink: 0;
-      border-bottom: 1px solid #30363d;
-    }
-
-    .pane-header {
-      flex: 1;
-      padding: 10px 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .pane-header.left  {
-      background: #0d1117;
-      border-right: 1px solid #30363d;
-      color: #d29922;
-    }
-    .pane-header.right { background: #0d1117; color: #3fb950; }
-
-    .pane-badge {
-      font-size: 0.7rem;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-weight: 600;
-      max-width: 260px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .badge-snapshot {
-      background: rgba(210,153,34,0.15);
-      color: #d29922;
-      border: 1px solid rgba(210,153,34,0.3);
-    }
-    .badge-live {
-      background: rgba(63,185,80,0.15);
-      color: #3fb950;
-      border: 1px solid rgba(63,185,80,0.3);
-    }
-
-    /* ── Split Pane Wrapper ── */
+    /* ── Split wrapper ── */
     .split-wrapper {
       flex: 1;
       overflow: hidden;
@@ -157,188 +104,118 @@
     .diff-bar {
       background: #161b22;
       border-top: 1px solid #30363d;
-      padding: 8px 20px;
+      padding: 7px 20px;
       display: flex;
       align-items: center;
       gap: 20px;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       flex-shrink: 0;
     }
 
-    .diff-stat  { display: flex; align-items: center; gap: 6px; }
-    .dot        { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .diff-stat  { display: flex; align-items: center; gap: 5px; }
+    .dot        { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
     .dot-changed  { background: #d29922; }
     .dot-added    { background: #3fb950; }
     .dot-removed  { background: #f85149; }
     .dot-match    { background: #484f58; }
 
-    /* ── Modal Overlay ── */
+    /* ── Modal ── */
     .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75); z-index: 200;
+      align-items: center; justify-content: center;
     }
-
     .modal-overlay.open { display: flex; }
 
     .modal-box {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      padding: 0;
-      width: 580px;
-      max-width: 95vw;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
+      background: #161b22; border: 1px solid #30363d;
+      border-radius: 10px; width: 600px; max-width: 95vw;
+      max-height: 85vh; display: flex; flex-direction: column;
       box-shadow: 0 16px 48px rgba(0,0,0,0.6);
     }
 
     .modal-header {
-      padding: 20px 24px 16px;
+      padding: 18px 22px 14px;
       border-bottom: 1px solid #30363d;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-shrink: 0;
     }
 
-    .modal-header h2 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #c9d1d9;
-    }
+    .modal-header h2 { font-size: 0.95rem; font-weight: 700; color: #c9d1d9; }
 
     .modal-close {
-      background: none;
-      border: none;
-      color: #6e7681;
-      font-size: 1.2rem;
-      cursor: pointer;
-      padding: 2px 6px;
-      border-radius: 4px;
-      line-height: 1;
+      background: none; border: none; color: #6e7681;
+      font-size: 1.1rem; cursor: pointer;
+      padding: 2px 6px; border-radius: 4px; line-height: 1;
     }
-
     .modal-close:hover { background: #21262d; color: #c9d1d9; }
 
-    /* ── Snapshot List ── */
-    .snapshot-list-wrap {
-      overflow-y: auto;
-      flex: 1;
-      padding: 12px;
-    }
+    .snapshot-list-wrap { overflow-y: auto; flex: 1; padding: 10px; }
 
     .snapshot-item {
-      padding: 12px 14px;
-      border-radius: 6px;
-      border: 1px solid #30363d;
-      background: #0d1117;
-      margin-bottom: 8px;
-      cursor: pointer;
+      padding: 11px 14px; border-radius: 6px;
+      border: 1px solid #30363d; background: #0d1117;
+      margin-bottom: 8px; cursor: pointer;
       transition: border-color 0.15s, background 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
     }
+    .snapshot-item:hover  { border-color: #58a6ff; background: #0f1923; }
+    .snapshot-item.selected { border-color: #238636; background: #0a1a0d; }
 
-    .snapshot-item:hover {
-      border-color: #58a6ff;
-      background: #0f1923;
-    }
-
-    .snapshot-item.selected {
-      border-color: #238636;
-      background: #0a1a0d;
-    }
-
-    .snapshot-item .s-name {
+    .s-name {
       font-family: 'Courier New', monospace;
-      font-size: 0.8rem;
-      color: #c9d1d9;
-      word-break: break-all;
+      font-size: 0.78rem; color: #c9d1d9; word-break: break-all;
+    }
+    .s-meta { font-size: 0.7rem; color: #6e7681; margin-top: 3px; }
+
+    .s-commands {
+      display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;
+    }
+    .s-cmd-tag {
+      font-size: 0.65rem; padding: 1px 6px; border-radius: 4px;
+      background: rgba(88,166,255,0.1); color: #58a6ff;
+      border: 1px solid rgba(88,166,255,0.2);
+      font-family: 'Courier New', monospace;
     }
 
-    .snapshot-item .s-meta {
-      font-size: 0.72rem;
-      color: #6e7681;
-      margin-top: 4px;
+    .s-check {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid #30363d; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; transition: all 0.15s;
     }
-
-    .snapshot-item .s-check {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 2px solid #30363d;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      transition: all 0.15s;
-    }
-
     .snapshot-item.selected .s-check {
-      background: #238636;
-      border-color: #238636;
-      color: #fff;
+      background: #238636; border-color: #238636; color: #fff;
     }
 
     .modal-footer {
-      padding: 16px 24px;
-      border-top: 1px solid #30363d;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      flex-shrink: 0;
+      padding: 14px 22px; border-top: 1px solid #30363d;
+      display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0;
     }
 
-    /* ── Loading spinner ── */
+    /* ── Spinner ── */
     .spinner {
-      display: inline-block;
-      width: 16px; height: 16px;
-      border: 2px solid #30363d;
-      border-top-color: #58a6ff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-right: 6px;
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #30363d; border-top-color: #58a6ff;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
       vertical-align: middle;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Toast notification ── */
+    /* ── Toast ── */
     .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 12px 18px;
-      font-size: 0.85rem;
-      color: #c9d1d9;
-      z-index: 300;
+      position: fixed; bottom: 20px; right: 20px;
+      background: #161b22; border: 1px solid #30363d;
+      border-radius: 8px; padding: 10px 16px;
+      font-size: 0.82rem; color: #c9d1d9; z-index: 300;
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      opacity: 0;
-      transform: translateY(12px);
+      opacity: 0; transform: translateY(10px);
       transition: opacity 0.25s, transform 0.25s;
       pointer-events: none;
     }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
+    .toast.show    { opacity: 1; transform: translateY(0); }
     .toast.success { border-left: 3px solid #3fb950; }
     .toast.error   { border-left: 3px solid #f85149; }
     .toast.info    { border-left: 3px solid #58a6ff; }
@@ -357,42 +234,40 @@
       </button>
     </div>
     <div class="topbar-right">
-      <button class="btn btn-live" id="btnLive"
-              onclick="runLive()" disabled>
-        ▶ Run Live
-      </button>
       <button class="btn btn-export" onclick="exportSnapshot()">
         ⬇ Export .tar
       </button>
     </div>
   </div>
 
+  <!-- ── Snapshot Info Bar ───────────────────────────────── -->
+  <div class="info-bar" id="infoBar" style="display:none;">
+    <div class="info-item">
+      📄 <span class="info-val" id="infoFile">—</span>
+    </div>
+    <div class="info-item">
+      🕐 <span class="info-val" id="infoTime">—</span>
+    </div>
+    <div class="info-item">
+      ⚙ Commands:&nbsp;<span class="info-val" id="infoCmds">—</span>
+    </div>
+    <div class="info-item">
+      🖥 Nodes:&nbsp;<span class="info-val" id="infoNodes">—</span>
+    </div>
+  </div>
+
   <!-- ── Node Nav ────────────────────────────────────────── -->
   <div id="nodeNav">
     <span class="nav-label">Node:</span>
-    <span style="color:#484f58; font-size:0.8rem; margin-left:4px;">
+    <span style="color:#484f58; font-size:0.78rem; margin-left:4px;">
       Load a snapshot to begin
     </span>
-  </div>
-
-  <!-- ── Pane Headers ────────────────────────────────────── -->
-  <div class="pane-headers">
-    <div class="pane-header left">
-      <span>Historical Snapshot</span>
-      <span class="pane-badge badge-snapshot"
-            id="snapshotLabel">Not loaded</span>
-    </div>
-    <div class="pane-header right">
-      <span>Live / New Data</span>
-      <span class="pane-badge badge-live"
-            id="liveLabel">Not collected</span>
-    </div>
   </div>
 
   <!-- ── Split Pane ──────────────────────────────────────── -->
   <div class="split-wrapper" id="splitWrapper"></div>
 
-  <!-- ── Diff Bar ────────────────────────────────────────── -->
+  <!-- ── Diff Summary Bar ────────────────────────────────── -->
   <div class="diff-bar">
     <div class="diff-stat">
       <span class="dot dot-changed"></span>
@@ -412,231 +287,194 @@
     </div>
   </div>
 
-  <!-- ── Load Snapshot Modal ─────────────────────────────── -->
+  <!-- ── Load Modal ──────────────────────────────────────── -->
   <div class="modal-overlay" id="loadModal">
     <div class="modal-box">
-
       <div class="modal-header">
         <h2>📂 Load Snapshot</h2>
         <button class="modal-close" onclick="closeLoadModal()">✕</button>
       </div>
-
-      <div class="snapshot-list-wrap" id="snapshotListWrap">
-        <!-- populated by openLoadModal() -->
-      </div>
-
+      <div class="snapshot-list-wrap" id="snapshotListWrap"></div>
       <div class="modal-footer">
-        <button class="btn btn-cancel" onclick="closeLoadModal()">
-          Cancel
-        </button>
+        <button class="btn btn-cancel" onclick="closeLoadModal()">Cancel</button>
         <button class="btn btn-confirm" id="btnConfirmLoad"
                 onclick="confirmLoad()" disabled>
           Load Selected
         </button>
       </div>
-
     </div>
   </div>
 
   <!-- ── Toast ───────────────────────────────────────────── -->
   <div class="toast" id="toast"></div>
 
-  <!-- ── Component Scripts ───────────────────────────────── -->
   <script src="/components/split-pane.js"></script>
   <script src="/components/node-nav.js"></script>
 
   <script>
-    // ── Session ─────────────────────────────────────────────
+    // ── Session ──────────────────────────────────────────────
     const session = JSON.parse(
       sessionStorage.getItem('aci_session') || 'null'
     );
 
     // ── State ────────────────────────────────────────────────
-    let snapshotData  = null;   // loaded historical JSON
-    let liveData      = null;   // live collected JSON
+    let snapshotData  = null;   // full loaded snapshot
+    let liveDataStore = {};     // { cmdKey: { nodeId: data } }
     let currentNodeId = null;
-    let selectedFile  = null;   // file chosen in modal
+    let selectedFile  = null;
 
-    // ────────────────────────────────────────────────────────
-    //  TOAST helper
-    // ────────────────────────────────────────────────────────
-    function showToast(message, type = 'info', duration = 3000) {
-      const toast = document.getElementById('toast');
-      toast.textContent = message;
-      toast.className   = `toast ${type} show`;
-      clearTimeout(toast._timer);
-      toast._timer = setTimeout(() => {
-        toast.classList.remove('show');
-      }, duration);
+    // ── Toast ────────────────────────────────────────────────
+    function showToast(msg, type = 'info', ms = 3000) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className   = `toast ${type} show`;
+      clearTimeout(t._t);
+      t._t = setTimeout(() => t.classList.remove('show'), ms);
     }
 
     // ────────────────────────────────────────────────────────
-    //  LOAD MODAL — open
+    //  LOAD MODAL
     // ────────────────────────────────────────────────────────
     async function openLoadModal() {
-  // Reset selection state every time modal opens
-  selectedFile = null;
-  document.getElementById('btnConfirmLoad').disabled = true;
+      selectedFile = null;
+      document.getElementById('btnConfirmLoad').disabled = true;
+      document.getElementById('loadModal').classList.add('open');
 
-  // Show modal immediately
-  document.getElementById('loadModal').classList.add('open');
-
-  const wrap = document.getElementById('snapshotListWrap');
-  wrap.innerHTML = `
-    <div style="padding:24px; text-align:center; color:#8b949e;">
-      <span class="spinner"></span> Loading snapshots…
-    </div>`;
-
-  try {
-    const res = await fetch('/api/snapshots');
-    if (!res.ok) throw new Error(`Server returned ${res.status}`);
-
-    const files = await res.json();
-
-    if (!Array.isArray(files) || files.length === 0) {
+      const wrap = document.getElementById('snapshotListWrap');
       wrap.innerHTML = `
-        <div style="padding:32px; text-align:center; color:#484f58;">
-          <div style="font-size:2rem; margin-bottom:8px;">📭</div>
-          No snapshots found. Run a collection first.
+        <div style="padding:24px; text-align:center; color:#8b949e;">
+          <span class="spinner"></span>&nbsp; Loading…
         </div>`;
-      return;
-    }
 
-    wrap.innerHTML = '';
+      try {
+        const res   = await fetch('/api/snapshots');
+        if (!res.ok) throw new Error(`Server ${res.status}`);
+        const files = await res.json();
 
-    files.forEach(entry => {
-      // ── Safely extract fields regardless of object shape ──
-      const filename  = typeof entry === 'string'
-                          ? entry
-                          : String(entry.filename || '');
+        if (!Array.isArray(files) || files.length === 0) {
+          wrap.innerHTML = `
+            <div style="padding:32px; text-align:center; color:#484f58;">
+              <div style="font-size:2rem; margin-bottom:8px;">📭</div>
+              No snapshots found. Run a collection first.
+            </div>`;
+          return;
+        }
 
-      const command   = typeof entry === 'string'
-                          ? '—'
-                          : String(entry.command || '—');
+        wrap.innerHTML = '';
 
-      const timestamp = typeof entry === 'string'
-                          ? '—'
-                          : entry.timestamp
-                            ? new Date(entry.timestamp).toLocaleString()
-                            : '—';
+        files.forEach(entry => {
+          const filename  = typeof entry === 'string' ? entry : String(entry.filename || '');
+          if (!filename) return;
 
-      const nodeCount = typeof entry === 'string'
-                          ? '—'
-                          : entry.nodeCount != null
-                            ? entry.nodeCount
-                            : '—';
+          const command   = entry.command   || '';
+          const commands  = entry.commands  ||
+            (command ? [command] : []);
+          const timestamp = entry.timestamp
+            ? new Date(entry.timestamp).toLocaleString()
+            : '—';
+          const nodeCount = entry.nodeCount != null ? entry.nodeCount : '—';
+          const sizeKB    = entry.sizeBytes
+            ? (entry.sizeBytes / 1024).toFixed(1) + ' KB'
+            : '';
 
-      const sizeKB    = typeof entry === 'string'
-                          ? ''
-                          : entry.sizeBytes
-                            ? (entry.sizeBytes / 1024).toFixed(1) + ' KB'
-                            : '';
+          const item = document.createElement('div');
+          item.className    = 'snapshot-item';
+          item.dataset.file = filename;
 
-      // Guard — skip any entry that has no valid filename
-      if (!filename) return;
+          // Build command tags HTML
+          const tagsHtml = commands
+            .map(c => `<span class="s-cmd-tag">${c.replace(/_/g,' ')}</span>`)
+            .join('');
 
-      const item = document.createElement('div');
-      item.className    = 'snapshot-item';
-      item.dataset.file = filename;
+          item.innerHTML = `
+            <div style="flex:1; min-width:0;">
+              <div class="s-name">${filename}</div>
+              <div class="s-meta">
+                ${timestamp}
+                &nbsp;·&nbsp; ${nodeCount} node(s)
+                ${sizeKB ? '&nbsp;·&nbsp;' + sizeKB : ''}
+              </div>
+              ${tagsHtml ? `<div class="s-commands">${tagsHtml}</div>` : ''}
+            </div>
+            <div class="s-check">✓</div>
+          `;
 
-      item.innerHTML = `
-        <div style="flex:1; min-width:0;">
-          <div class="s-name">${filename}</div>
-          <div class="s-meta">
-            ${command}
-            &nbsp;·&nbsp; ${timestamp}
-            &nbsp;·&nbsp; ${nodeCount} node(s)
-            ${sizeKB ? '&nbsp;·&nbsp;' + sizeKB : ''}
-          </div>
-        </div>
-        <div class="s-check">✓</div>
-      `;
+          item.addEventListener('click', function () {
+            document.querySelectorAll('.snapshot-item')
+              .forEach(el => el.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedFile = this.dataset.file;
+            document.getElementById('btnConfirmLoad').disabled = false;
+          });
 
-      // ── Click handler ──────────────────────────────────────
-      item.addEventListener('click', function () {
-        // Deselect all
-        document.querySelectorAll('.snapshot-item').forEach(el => {
-          el.classList.remove('selected');
+          wrap.appendChild(item);
         });
 
-        // Select this one
-        this.classList.add('selected');
-        selectedFile = this.dataset.file;
+      } catch (err) {
+        wrap.innerHTML = `
+          <div style="padding:20px; color:#f85149; font-size:0.82rem;">
+            ⚠ ${err.message}
+          </div>`;
+        console.error('[openLoadModal]', err);
+      }
+    }
 
-        // Enable confirm button
-        document.getElementById('btnConfirmLoad').disabled = false;
-      });
-
-      wrap.appendChild(item);
-    });
-
-  } catch (err) {
-    wrap.innerHTML = `
-      <div style="padding:24px; color:#f85149; font-size:0.85rem;">
-        ⚠ Failed to load snapshots: ${err.message}
-      </div>`;
-    console.error('[openLoadModal]', err);
-  }
-}
-
-    // ────────────────────────────────────────────────────────
-    //  LOAD MODAL — close
-    // ────────────────────────────────────────────────────────
     function closeLoadModal() {
       document.getElementById('loadModal').classList.remove('open');
     }
 
-    // Close on overlay backdrop click
     document.getElementById('loadModal').addEventListener('click', function (e) {
       if (e.target === this) closeLoadModal();
     });
 
     // ────────────────────────────────────────────────────────
-    //  CONFIRM LOAD — fetch and render snapshot
+    //  CONFIRM LOAD
     // ────────────────────────────────────────────────────────
     async function confirmLoad() {
       if (!selectedFile) return;
 
-      // Update button state
       const btn = document.getElementById('btnConfirmLoad');
-      btn.disabled     = true;
-      btn.innerHTML    = '<span class="spinner"></span> Loading…';
+      btn.disabled  = true;
+      btn.innerHTML = '<span class="spinner"></span>&nbsp; Loading…';
 
       try {
-        const res = await fetch(`/api/snapshots/${encodeURIComponent(selectedFile)}`);
-
-        if (!res.ok) {
-          throw new Error(`Server returned ${res.status} for "${selectedFile}"`);
-        }
+        const res = await fetch(
+          `/api/snapshots/${encodeURIComponent(selectedFile)}`
+        );
+        if (!res.ok) throw new Error(`Server ${res.status}`);
 
         snapshotData = await res.json();
 
-        // Validate snapshot structure
-        if (!snapshotData || typeof snapshotData.nodes !== 'object') {
-          throw new Error('Snapshot file is missing or has an invalid "nodes" structure.');
+        // Support both unified { nodes: { nodeId: { cmdKey: data } } }
+        // and legacy single-command { nodes: { nodeId: { ...data } } }
+        if (!snapshotData?.nodes) {
+          throw new Error('Snapshot missing "nodes" structure.');
         }
 
-        const nodeIds = Object.keys(snapshotData.nodes);
+        const nodeIds  = Object.keys(snapshotData.nodes);
+        if (nodeIds.length === 0) throw new Error('Snapshot has no node data.');
 
-        if (nodeIds.length === 0) {
-          throw new Error('Snapshot contains no node data.');
-        }
+        // Reset live store for new snapshot
+        liveDataStore = {};
 
-        // Update badge
-        document.getElementById('snapshotLabel').textContent =
-          selectedFile.length > 40
-            ? '…' + selectedFile.slice(-38)
+        // Update info bar
+        const cmds = snapshotData.commands || [snapshotData.command] || [];
+        document.getElementById('infoFile').textContent =
+          selectedFile.length > 50
+            ? '…' + selectedFile.slice(-48)
             : selectedFile;
-
-        // Reset live pane
-        liveData = null;
-        document.getElementById('liveLabel').textContent = 'Not collected';
+        document.getElementById('infoTime').textContent =
+          snapshotData.timestamp
+            ? new Date(snapshotData.timestamp).toLocaleString()
+            : '—';
+        document.getElementById('infoCmds').textContent =
+          cmds.map(c => c.replace(/_/g,' ')).join(', ');
+        document.getElementById('infoNodes').textContent =
+          nodeIds.join(', ');
+        document.getElementById('infoBar').style.display = 'flex';
 
         // Init node navigation
         NodeNav.init(nodeIds, onNodeChange);
-
-        // Show live button only if session is available
-        document.getElementById('btnLive').disabled = !session;
 
         closeLoadModal();
         showToast(`Loaded: ${selectedFile}`, 'success');
@@ -644,15 +482,13 @@
       } catch (err) {
         showToast(`Load failed: ${err.message}`, 'error', 5000);
         console.error('[confirmLoad]', err);
-
-        // Re-enable button so user can retry
         btn.disabled  = false;
         btn.innerHTML = 'Load Selected';
       }
     }
 
     // ────────────────────────────────────────────────────────
-    //  NODE NAV — callback when node changes
+    //  NODE CHANGE
     // ────────────────────────────────────────────────────────
     function onNodeChange(nodeId) {
       currentNodeId = nodeId;
@@ -660,65 +496,65 @@
     }
 
     // ────────────────────────────────────────────────────────
-    //  RENDER COMPARISON — draw split pane
+    //  RENDER COMPARISON — full re-render on node change
     // ────────────────────────────────────────────────────────
     function renderComparison() {
-      const leftData  = snapshotData?.nodes?.[currentNodeId] ?? null;
-      const rightData = liveData?.nodes?.[currentNodeId]     ?? null;
+      if (!snapshotData || !currentNodeId) return;
 
-      const stats = SplitPane.render(
+      const cmds         = snapshotData.commands || [snapshotData.command];
+      const leftNodeData = snapshotData.nodes[currentNodeId] || {};
+
+      // Merge live data for this node
+      const rightNodeData = {};
+      cmds.forEach(cmd => {
+        if (liveDataStore[cmd]?.[currentNodeId]) {
+          rightNodeData[cmd] = liveDataStore[cmd][currentNodeId];
+        }
+      });
+
+      const leftTs  = snapshotData.timestamp
+        ? new Date(snapshotData.timestamp).toLocaleString()
+        : '';
+
+      const totals = SplitPane.render(
         document.getElementById('splitWrapper'),
-        leftData,
-        rightData
+        leftNodeData,
+        Object.keys(rightNodeData).length > 0 ? rightNodeData : null,
+        {
+          commands:  cmds,
+          timestamps: { left: leftTs, right: '' },
+          onRunLive: session ? handleRunLive : null
+        }
       );
 
-      document.getElementById('statChanged').textContent =
-        `${stats.changed} changed`;
-      document.getElementById('statAdded').textContent =
-        `${stats.added} added`;
-      document.getElementById('statRemoved').textContent =
-        `${stats.removed} removed`;
-      document.getElementById('statMatch').textContent =
-        `${stats.matching} matching`;
+      updateDiffBar(totals);
     }
 
     // ────────────────────────────────────────────────────────
-    //  RUN LIVE — stream new data into right pane
+    //  RUN LIVE — per command block
     // ────────────────────────────────────────────────────────
-    async function runLive() {
-      if (!session) {
-        showToast('No active session. Please log in again.', 'error');
-        return;
-      }
-      if (!snapshotData) {
-        showToast('Load a snapshot first before running live.', 'info');
-        return;
-      }
+    async function handleRunLive(cmdKey, btnEl) {
+      if (!session || !snapshotData || !currentNodeId) return;
 
-      const btnLive = document.getElementById('btnLive');
-      btnLive.disabled  = true;
-      btnLive.innerHTML = '<span class="spinner"></span> Collecting…';
-      document.getElementById('liveLabel').textContent = 'Collecting…';
+      btnEl.disabled  = true;
+      btnEl.innerHTML = '<span class="spinner"></span> Collecting…';
 
-      const command = snapshotData.command;
       const nodeIds = Object.keys(snapshotData.nodes);
 
       try {
         const response = await fetch('/api/commands/run', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({
+          body: JSON.stringify({
             apicIp:   session.apicIp,
             username: session.username,
             password: session.password,
             nodeIds,
-            commands: [command]
+            commands: [cmdKey]   // run only this command
           })
         });
 
-        if (!response.ok) {
-          throw new Error(`Run endpoint returned ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`Server ${response.status}`);
 
         const reader  = response.body.getReader();
         const decoder = new TextDecoder();
@@ -740,78 +576,155 @@
               const parsed = JSON.parse(cleaned);
 
               if (parsed.snapshot_saved) {
-                // Load the just-saved snapshot as live data
+                // Load the saved snapshot to extract live node data
                 const r2 = await fetch(
                   `/api/snapshots/${encodeURIComponent(parsed.snapshot_saved)}`
                 );
-                liveData = await r2.json();
+                const liveSnap = await r2.json();
 
-                document.getElementById('liveLabel').textContent =
-                  parsed.snapshot_saved.length > 40
-                    ? '…' + parsed.snapshot_saved.slice(-38)
-                    : parsed.snapshot_saved;
+                // Store per-command live data for all nodes
+                if (!liveDataStore[cmdKey]) liveDataStore[cmdKey] = {};
 
-                renderComparison();
-                showToast('Live data collected successfully.', 'success');
+                nodeIds.forEach(nid => {
+                  const nodeEntry = liveSnap.nodes?.[nid];
+                  if (nodeEntry) {
+                    // Unified format: nodes[nodeId][cmdKey]
+                    liveDataStore[cmdKey][nid] =
+                      nodeEntry[cmdKey] ?? nodeEntry;
+                  }
+                });
+
+                // Update only the live pane for this command
+                const liveNodeEntry = liveDataStore[cmdKey][currentNodeId];
+                const leftNodeData  = snapshotData.nodes[currentNodeId] || {};
+                const rightForCmd   = liveNodeEntry
+                  ? { [cmdKey]: liveNodeEntry }
+                  : null;
+
+                const stats = SplitPane.updateLivePane(
+                  cmdKey,
+                  leftNodeData,
+                  rightForCmd,
+                  new Date(liveSnap.timestamp).toLocaleString()
+                );
+
+                // Recalculate totals across all commands for this node
+                recalcTotals();
+
+                showToast(
+                  `Live data collected for ${cmdKey.replace(/_/g,' ')}`,
+                  'success'
+                );
               }
-            } catch { /* non-JSON stream lines — ignore */ }
+            } catch { /* non-JSON progress lines */ }
           }
         }
 
       } catch (err) {
         showToast(`Live run failed: ${err.message}`, 'error', 5000);
-        console.error('[runLive]', err);
+        console.error('[handleRunLive]', err);
       } finally {
-        btnLive.disabled  = false;
-        btnLive.innerHTML = '▶ Run Live';
+        btnEl.disabled  = false;
+        btnEl.innerHTML = '▶ Run Live';
       }
     }
 
+    // ── Recalculate totals from current live store ────────────
+    function recalcTotals() {
+      if (!snapshotData || !currentNodeId) return;
+
+      const cmds         = snapshotData.commands || [snapshotData.command];
+      const leftNodeData = snapshotData.nodes[currentNodeId] || {};
+      const totals       = { changed: 0, added: 0, removed: 0, matching: 0 };
+
+      cmds.forEach(cmd => {
+        const liveEntry = liveDataStore[cmd]?.[currentNodeId];
+        if (!liveEntry) return;
+
+        const leftFlat  = flattenSimple(leftNodeData[cmd]  || {});
+        const rightFlat = flattenSimple(liveEntry);
+
+        const allKeys = new Set([
+          ...Object.keys(leftFlat),
+          ...Object.keys(rightFlat)
+        ]);
+
+        for (const key of allKeys) {
+          const lv = leftFlat[key];
+          const rv = rightFlat[key];
+          if      (lv === undefined) totals.added++;
+          else if (rv === undefined) totals.removed++;
+          else if (lv !== rv)        totals.changed++;
+          else                       totals.matching++;
+        }
+      });
+
+      updateDiffBar(totals);
+    }
+
+    function flattenSimple(obj, prefix = '') {
+      const out = {};
+      for (const [k, v] of Object.entries(obj || {})) {
+        const key = prefix ? `${prefix}.${k}` : k;
+        if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
+          Object.assign(out, flattenSimple(v, key));
+        } else {
+          out[key] = Array.isArray(v) ? JSON.stringify(v) : String(v ?? '');
+        }
+      }
+      return out;
+    }
+
+    function updateDiffBar(totals) {
+      document.getElementById('statChanged').textContent =
+        `${totals.changed} changed`;
+      document.getElementById('statAdded').textContent =
+        `${totals.added} added`;
+      document.getElementById('statRemoved').textContent =
+        `${totals.removed} removed`;
+      document.getElementById('statMatch').textContent =
+        `${totals.matching} matching`;
+    }
+
     // ────────────────────────────────────────────────────────
-    //  EXPORT — download selected snapshot as .tar
+    //  EXPORT
     // ────────────────────────────────────────────────────────
     async function exportSnapshot() {
       if (!selectedFile) {
         showToast('Load a snapshot first to export it.', 'info');
         return;
       }
-
       showToast('Preparing export…', 'info', 2000);
-
       try {
         const res = await fetch('/api/snapshots/export', {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ files: [selectedFile] })
         });
-
         if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || `Export failed (${res.status})`);
+          const e = await res.json();
+          throw new Error(e.error || `Export failed (${res.status})`);
         }
-
-        const blob     = await res.blob();
-        const url      = URL.createObjectURL(blob);
-        const anchor   = document.createElement('a');
-        anchor.href    = url;
+        const blob   = await res.blob();
+        const url    = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href     = url;
         anchor.download = `aci_export_${Date.now()}.tar`;
         document.body.appendChild(anchor);
         anchor.click();
         document.body.removeChild(anchor);
         URL.revokeObjectURL(url);
-
-        showToast('Export downloaded successfully.', 'success');
-
+        showToast('Export downloaded.', 'success');
       } catch (err) {
         showToast(`Export failed: ${err.message}`, 'error', 5000);
-        console.error('[exportSnapshot]', err);
       }
     }
 
-    // ────────────────────────────────────────────────────────
-    //  INIT — render empty split pane on page load
-    // ────────────────────────────────────────────────────────
-    SplitPane.render(document.getElementById('splitWrapper'), null, null);
+    // ── Initial empty render ──────────────────────────────────
+    SplitPane.render(
+      document.getElementById('splitWrapper'),
+      null, null, {}
+    );
   </script>
 </body>
 </html>
