@@ -3,7 +3,7 @@ FROM redhat/ubi8:latest
 
 # ── Labels ───────────────────────────────────────────────────
 LABEL maintainer="Cisco ACI Dashboard"
-LABEL description="ACI Node Comparison Dashboard — Node.js + Python on UBI8"
+LABEL description="ACI Node Comparison Dashboard"
 LABEL version="1.0.0"
 
 # ── System packages ──────────────────────────────────────────
