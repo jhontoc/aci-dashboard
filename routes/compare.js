@@ -8,14 +8,26 @@ const SNAPSHOT_DIR = path.join(__dirname, '../data/snapshots');
 /**
  * Recursively flatten a nested object to dot-notation key-value pairs.
  */
-function flatten(obj, prefix = '') {
-  const result = {};
-  for (const [key, val] of Object.entries(obj || {})) {
-    const fullKey = prefix ? `${prefix}.${key}` : key;
-    if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
-      Object.assign(result, flatten(val, fullKey));
+function flatten(obj, prefix) {
+  prefix = prefix || '';
+  var result = {};
+
+  var entries = Object.entries(obj || {});
+  for (var i = 0; i < entries.length; i++) {
+    var key = entries[i][0];
+    var val = entries[i][1];
+    var fullKey = prefix ? prefix + '.' + key : key;
+
+    if (val !== null && val !== undefined && typeof val === 'object' && !Array.isArray(val)) {
+      var nested = flatten(val, fullKey);
+      var nestedKeys = Object.keys(nested);
+      for (var j = 0; j < nestedKeys.length; j++) {
+        result[nestedKeys[j]] = nested[nestedKeys[j]];
+      }
     } else {
-      result[fullKey] = Array.isArray(val) ? JSON.stringify(val) : String(val ?? '');
+      // ── Fix: replace val ?? '' with explicit null/undefined check ──
+      var safeVal = (val !== null && val !== undefined) ? val : '';
+      result[fullKey] = Array.isArray(val) ? JSON.stringify(val) : String(safeVal);
     }
   }
   return result;

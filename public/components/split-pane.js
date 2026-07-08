@@ -259,14 +259,26 @@ const SplitPane = (() => {
     }
   
     // ── Flatten nested object to dot-notation ──────────────────
-    function flatten(obj, prefix = '') {
-      const out = {};
-      for (const [k, v] of Object.entries(obj || {})) {
-        const key = prefix ? `${prefix}.${k}` : k;
-        if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
-          Object.assign(out, flatten(v, key));
+    function flatten(obj, prefix) {
+      prefix = prefix || '';
+      var out = {};
+    
+      var entries = Object.entries(obj || {});
+      for (var i = 0; i < entries.length; i++) {
+        var k   = entries[i][0];
+        var v   = entries[i][1];
+        var key = prefix ? prefix + '.' + k : k;
+    
+        if (v !== null && v !== undefined && typeof v === 'object' && !Array.isArray(v)) {
+          var nested = flatten(v, key);
+          var nestedKeys = Object.keys(nested);
+          for (var j = 0; j < nestedKeys.length; j++) {
+            out[nestedKeys[j]] = nested[nestedKeys[j]];
+          }
         } else {
-          out[key] = Array.isArray(v) ? JSON.stringify(v) : String(v ?? '');
+          // ── Fix: replace val ?? '' with explicit null/undefined check ──
+          var safeVal = (v !== null && v !== undefined) ? v : '';
+          out[key] = Array.isArray(v) ? JSON.stringify(v) : String(safeVal);
         }
       }
       return out;
@@ -345,8 +357,13 @@ const SplitPane = (() => {
     // ── Build one collapsible command block ───────────────────
     function buildCommandBlock(cmdKey, leftNodeData, rightNodeData, timestamps, onRunLive) {
       const label     = COMMAND_LABELS[cmdKey] || cmdKey;
-      const leftData  = leftNodeData?.[cmdKey]  ?? null;
-      const rightData = rightNodeData?.[cmdKey] ?? null;
+      var leftData = (leftNodeData && leftNodeData[cmdKey] !== undefined)
+        ? leftNodeData[cmdKey]
+        : null;
+    
+      var rightData = (rightNodeData && rightNodeData[cmdKey] !== undefined)
+        ? rightNodeData[cmdKey]
+        : null;
   
       const leftFlat  = leftData  ? flatten(leftData)  : {};
       const rightFlat = rightData ? flatten(rightData)  : {};
@@ -566,8 +583,13 @@ const SplitPane = (() => {
       const pane = document.getElementById(`live-pane-${cmdKey}`);
       if (!pane) return { changed: 0, added: 0, removed: 0, matching: 0 };
   
-      const leftData  = leftNodeData?.[cmdKey]  ?? null;
-      const rightData = rightNodeData?.[cmdKey] ?? null;
+      var leftData = (leftNodeData && leftNodeData[cmdKey] !== undefined)
+        ? leftNodeData[cmdKey]
+        : null;
+    
+      var rightData = (rightNodeData && rightNodeData[cmdKey] !== undefined)
+        ? rightNodeData[cmdKey]
+        : null;
   
       const leftFlat  = leftData  ? flatten(leftData)  : {};
       const rightFlat = rightData ? flatten(rightData)  : {};
