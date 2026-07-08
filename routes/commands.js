@@ -1,95 +1,93 @@
 'use strict';
 
-const express  = require('express');
-const { spawn } = require('child_process');
-const path     = require('path');
-const fs       = require('fs');
-const router   = express.Router();
+var express      = require('express');
+var spawn        = require('child_process').spawn;
+var path         = require('path');
+var fs           = require('fs');
+var router       = express.Router();
 
-const SNAPSHOT_DIR = path.join(__dirname, '../data/snapshots');
+var SNAPSHOT_DIR = path.join(__dirname, '../data/snapshots');
 
 // ── Script map ───────────────────────────────────────────────
-const SCRIPT_MAP = {
+var SCRIPT_MAP = {
   show_version:          path.join(__dirname, '../scripts/aci_show_version.py'),
   show_interface_status: path.join(__dirname, '../scripts/aci_show_interface_status.py')
 };
 
 // ────────────────────────────────────────────────────────────
-//  Helper — run one Python script, collect full stdout
-//  Returns: { stdoutBuf, stderrBuf, code }
+//  sanitiseProxy — normalise all empty / null proxy values
+//
+//  Handles every form the frontend might send:
+//    null, undefined, "", "null", "  " → returns null
+//    "/app/config/proxy.yaml"          → returns the string
 // ────────────────────────────────────────────────────────────
-function runScript(
-  scriptPath,
-  apicIp,
-  username,
-  password,
-  nodeIds,
-  apiPort   = '443',
-  proxyYaml = null
-) {
-  return new Promise((resolve, reject) => {
+function sanitiseProxy(val) {
+  if (val === null || val === undefined) return null;
+  if (typeof val !== 'string')           return null;
+
+  var trimmed = val.trim();
+  if (trimmed === '' || trimmed === 'null') return null;
+
+  return trimmed;
+}
+
+// ────────────────────────────────────────────────────────────
+//  runScript — spawn one Python script, collect stdout/stderr
+//
+//  proxyYaml must already be sanitised (null or valid path)
+//  before this function is called.
+// ────────────────────────────────────────────────────────────
+function runScript(scriptPath, apicIp, username, password, nodeIds, apiPort, proxyYaml) {
+  return new Promise(function (resolve, reject) {
 
     // ── Build argument list ─────────────────────────────────
-    const args = [
+    var args = [
       scriptPath,
       '--apic',  apicIp,
       '--user',  username,
       '--pass',  password,
       '--nodes', nodeIds.join(','),
-      '--port',  apiPort
+      '--port',  apiPort || '443'
     ];
 
-    // Only append --proxy when a path was provided
+    // Only append --proxy when a valid path is provided
+    // proxyYaml is guaranteed null or a non-empty string here
     if (proxyYaml) {
       args.push('--proxy', proxyYaml);
     }
 
-    const proc = spawn('python3', args);
+    var proc      = spawn('python3', args);
+    var stdoutBuf = '';
+    var stderrBuf = '';
 
-    let stdoutBuf = '';
-    let stderrBuf = '';
+    proc.stdout.on('data', function (chunk) { stdoutBuf += chunk.toString(); });
+    proc.stderr.on('data', function (chunk) { stderrBuf += chunk.toString(); });
 
-    proc.stdout.on('data', chunk => { stdoutBuf += chunk.toString(); });
-    proc.stderr.on('data', chunk => { stderrBuf += chunk.toString(); });
-
-    proc.on('close', code => {
-      resolve({ stdoutBuf, stderrBuf, code });
+    proc.on('close', function (code) {
+      resolve({ stdoutBuf: stdoutBuf, stderrBuf: stderrBuf, code: code });
     });
 
-    proc.on('error', err => reject(err));
+    proc.on('error', function (err) { reject(err); });
   });
 }
 
 // ────────────────────────────────────────────────────────────
 //  POST /api/commands/run
-//
-//  Expected request body:
-//  {
-//    apicIp:    "10.0.0.1",
-//    username:  "admin",
-//    password:  "****",
-//    nodeIds:   ["101", "102"],
-//    commands:  ["show_version", "show_interface_status"],
-//    apiPort:   "443",               // optional — default "443"
-//    proxyYaml: "/app/config/..."    // optional — null = direct
-//  }
-//
-//  Streams progress via Server-Sent Events (SSE).
-//  Saves ONE unified snapshot file containing all
-//  selected commands for all nodes.
 // ────────────────────────────────────────────────────────────
-router.post('/run', async (req, res) => {
-  const {
-    apicIp,
-    username,
-    password,
-    nodeIds,
-    commands,
-    apiPort   = '443',
-    proxyYaml = null
-  } = req.body;
+router.post('/run', function (req, res) {
+  var apicIp   = req.body.apicIp;
+  var username = req.body.username;
+  var password = req.body.password;
+  var nodeIds  = req.body.nodeIds;
+  var commands = req.body.commands;
+  var apiPort  = req.body.apiPort || '443';
 
-  // ── Input validation ──────────────────────────────────────
+  // ── Sanitise proxy value — the key fix ───────────────────
+  // Regardless of what the frontend sends (null, "", "null", path)
+  // this resolves to either null or a valid path string
+  var proxyYaml = sanitiseProxy(req.body.proxyYaml);
+
+  // ── Validation ────────────────────────────────────────────
   if (!apicIp || !username || !password) {
     return res.status(400).json({
       error: 'apicIp, username, and password are required.'
@@ -108,17 +106,21 @@ router.post('/run', async (req, res) => {
     });
   }
 
-  const invalidCmds = commands.filter(c => !SCRIPT_MAP[c]);
+  var invalidCmds = commands.filter(function (c) {
+    return !SCRIPT_MAP[c];
+  });
   if (invalidCmds.length > 0) {
     return res.status(400).json({
-      error: `Unknown commands: ${invalidCmds.join(', ')}`
+      error: 'Unknown commands: ' + invalidCmds.join(', ')
     });
   }
 
-  // Validate proxyYaml path exists inside container if provided
-  if (proxyYaml && !fs.existsSync(proxyYaml)) {
+  // ── Proxy path validation — only when a path was given ───
+  // If proxyYaml is null we skip this check entirely
+  // Direct connection is assumed when proxyYaml is null
+  if (proxyYaml !== null && !fs.existsSync(proxyYaml)) {
     return res.status(400).json({
-      error: `Proxy YAML file not found at path: ${proxyYaml}`
+      error: 'Proxy YAML file not found at path: ' + proxyYaml
     });
   }
 
@@ -126,169 +128,171 @@ router.post('/run', async (req, res) => {
   res.setHeader('Content-Type',      'text/event-stream');
   res.setHeader('Cache-Control',     'no-cache');
   res.setHeader('Connection',        'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');  // disable Nginx buffering
+  res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
   // ── SSE send helper ───────────────────────────────────────
   function send(data) {
-    const payload = typeof data === 'object'
+    var payload = typeof data === 'object'
       ? JSON.stringify(data)
       : String(data);
-    res.write(`data: ${payload}\n\n`);
+    res.write('data: ' + payload + '\n\n');
   }
 
-  // ── Log proxy info to stream if configured ────────────────
+  // ── Log connection mode to stream ─────────────────────────
   send({
-    status:     'started',
-    commands,
-    nodeCount:  nodeIds.length,
-    apiPort,
-    proxy:      proxyYaml
-      ? `YAML: ${proxyYaml}`
-      : 'None (direct connection)'
+    status:    'started',
+    commands:  commands,
+    nodeCount: nodeIds.length,
+    apiPort:   apiPort,
+    proxy:     proxyYaml
+      ? 'Via proxy YAML: ' + proxyYaml
+      : 'Direct connection (no proxy)'    // ← clear confirmation
   });
 
-  // ── Unified snapshot — built across all commands ──────────
-  const now      = new Date();
-  const snapshot = {
+  // ── Unified snapshot structure ────────────────────────────
+  var now      = new Date();
+  var snapshot = {
     timestamp: now.toISOString(),
-    commands,                         // all selected command keys
+    commands:  commands,
     apic:      apicIp,
-    apiPort,
-    proxy:     proxyYaml || null,
-    nodes:     {}                     // { nodeId: { cmdKey: data } }
+    apiPort:   apiPort,
+    proxy:     proxyYaml,    // null stored in snapshot when no proxy
+    nodes:     {}
   };
 
-  // Pre-populate every node key so structure is consistent
-  // even if a command fails for a specific node
-  nodeIds.forEach(id => {
+  nodeIds.forEach(function (id) {
     snapshot.nodes[id] = {};
   });
 
-  // ── Run each selected command sequentially ────────────────
-  for (const cmd of commands) {
+  // ── Run each command sequentially ─────────────────────────
+  var cmdIndex = 0;
+
+  function runNext() {
+    if (cmdIndex >= commands.length) {
+      // All commands done — save snapshot
+      saveSnapshot();
+      return;
+    }
+
+    var cmd = commands[cmdIndex];
+    cmdIndex++;
 
     send({
       status:  'spawning',
       command: cmd,
-      script:  path.basename(SCRIPT_MAP[cmd])
+      script:  path.basename(SCRIPT_MAP[cmd]),
+      proxy:   proxyYaml ? proxyYaml : 'none'
     });
 
-    try {
-      const { stdoutBuf, stderrBuf, code } = await runScript(
-        SCRIPT_MAP[cmd],
-        apicIp,
-        username,
-        password,
-        nodeIds,
-        apiPort,
-        proxyYaml
-      );
+    runScript(
+      SCRIPT_MAP[cmd],
+      apicIp,
+      username,
+      password,
+      nodeIds,
+      apiPort,
+      proxyYaml       // null → no --proxy arg appended in runScript()
+    )
+    .then(function (result) {
+      var stdoutBuf = result.stdoutBuf;
+      var stderrBuf = result.stderrBuf;
+      var code      = result.code;
 
-      // ── Forward stderr lines to SSE stream ───────────────
+      // Forward stderr to stream
       if (stderrBuf.trim()) {
-        stderrBuf
-          .split('\n')
-          .filter(Boolean)
-          .forEach(line => {
-            send({ status: 'stderr', command: cmd, message: line.trim() });
-          });
-      }
-
-      // ── Parse stdout — one JSON line at a time ────────────
-      const lines = stdoutBuf.split('\n').filter(Boolean);
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-
-        // Forward every line to the SSE stream for terminal display
-        send(trimmed);
-
-        // Try to parse as JSON to extract node data
-        try {
-          const parsed = JSON.parse(trimmed);
-
-          // Line shape from Python scripts:
-          // { "node": "101", "data": { ...commandData } }
-          if (parsed.node && parsed.data) {
-
-            // Merge into unified snapshot under correct node + cmd key
-            snapshot.nodes[parsed.node][cmd] = parsed.data;
-
-          }
-        } catch {
-          // Non-JSON progress lines (e.g. [AUTH] messages) — already
-          // forwarded to SSE above, nothing else needed here
+        var stderrLines = stderrBuf.split('\n').filter(Boolean);
+        for (var si = 0; si < stderrLines.length; si++) {
+          send({ status: 'stderr', command: cmd, message: stderrLines[si].trim() });
         }
       }
 
-      // ── Report command completion ─────────────────────────
+      // Parse stdout lines
+      var lines = stdoutBuf.split('\n').filter(Boolean);
+      for (var li = 0; li < lines.length; li++) {
+        var trimmed = lines[li].trim();
+        send(trimmed);  // forward raw to SSE terminal
+
+        try {
+          var parsed = JSON.parse(trimmed);
+          // Merge node data into unified snapshot
+          if (parsed.node && parsed.data) {
+            snapshot.nodes[parsed.node][cmd] = parsed.data;
+          }
+        } catch (e) {
+          // Non-JSON progress line — already forwarded above
+        }
+      }
+
       send({
         status:  code === 0 ? 'command_done' : 'command_error',
         command: cmd,
-        code
+        code:    code
       });
 
-    } catch (spawnErr) {
-      // Script failed to spawn entirely (e.g. python3 not found)
+      // Run next command
+      runNext();
+    })
+    .catch(function (spawnErr) {
       send({
         status:  'spawn_error',
         command: cmd,
         message: spawnErr.message
       });
-    }
+      // Continue to next command even on spawn error
+      runNext();
+    });
   }
 
-  // ── Save unified snapshot to disk ────────────────────────
-  try {
-    // Ensure snapshot directory exists
-    if (!fs.existsSync(SNAPSHOT_DIR)) {
-      fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
+  // ── Save unified snapshot ─────────────────────────────────
+  function saveSnapshot() {
+    try {
+      if (!fs.existsSync(SNAPSHOT_DIR)) {
+        fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
+      }
+
+      var ts       = now.toISOString()
+        .replace(/:/g, '_')
+        .replace(/\./g, '_');
+      var cmdSlug  = commands.join('__');
+      var filename = 'snapshot_' + ts + '__' + cmdSlug + '.json';
+      var outPath  = path.join(SNAPSHOT_DIR, filename);
+
+      fs.writeFileSync(outPath, JSON.stringify(snapshot, null, 2));
+
+      send({
+        status:         'snapshot_saved',
+        snapshot_saved: filename,
+        path:           outPath,
+        commands:       commands,
+        nodeCount:      nodeIds.length,
+        proxy:          proxyYaml ? proxyYaml : 'none'
+      });
+
+    } catch (saveErr) {
+      send({
+        status:  'save_error',
+        message: 'Failed to save snapshot: ' + saveErr.message
+      });
     }
 
-    // Build filename — timestamp + all command keys
-    const ts      = now.toISOString()
-      .replace(/:/g, '_')   // colons not valid in filenames
-      .replace(/\./g, '_'); // replace dot in milliseconds
-
-    const cmdSlug  = commands.join('__');
-    const filename = `snapshot_${ts}__${cmdSlug}.json`;
-    const outPath  = path.join(SNAPSHOT_DIR, filename);
-
-    fs.writeFileSync(outPath, JSON.stringify(snapshot, null, 2));
-
-    send({
-      status:         'snapshot_saved',
-      snapshot_saved: filename,
-      path:           outPath,
-      commands,
-      nodeCount:      nodeIds.length
-    });
-
-    // SSE termination sentinel — frontend listens for this
     res.write('data: [ALL_COMPLETE]\n\n');
-
-  } catch (saveErr) {
-    send({
-      status:  'save_error',
-      message: `Failed to save snapshot: ${saveErr.message}`
-    });
-    res.write('data: [ALL_COMPLETE]\n\n');
+    res.end();
   }
 
-  res.end();
+  // ── Start execution ───────────────────────────────────────
+  runNext();
 
-  // ── Handle early client disconnect ────────────────────────
-  req.on('close', () => {
+  // ── Handle client disconnect ──────────────────────────────
+  req.on('close', function () {
     console.log('[commands] Client disconnected — SSE stream closed.');
   });
 });
 
 // ────────────────────────────────────────────────────────────
 //  GET /api/commands/list
-//  Returns available commands and their metadata
 // ────────────────────────────────────────────────────────────
-router.get('/list', (_req, res) => {
+router.get('/list', function (_req, res) {
   res.json([
     {
       key:         'show_version',

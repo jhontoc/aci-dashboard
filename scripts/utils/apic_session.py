@@ -117,20 +117,14 @@ class ApicSession:
         if proxy_yaml:
             # load_proxy_from_yaml() — from aci_auth_Proxy.py
             self._proxy_info = load_proxy_from_yaml(proxy_yaml)
-
-            # Validate SOCKS5 library before attempting connection
             _validate_socks5(self._proxy_info['protocol'])
+            self.proxies = build_proxy(...)
 
-            # build_proxy() — from aci_auth_Proxy.py
-            self.proxies = build_proxy(
-                self._proxy_info['protocol'],
-                self._proxy_info['host'],
-                self._proxy_info['port']
-            )
         else:
             # No proxy — empty strings match aci_auth_Proxy.py
             # direct-connection pattern
-            self.proxies = {"http": "", "https": ""}
+                self.proxies     = {"http": "", "https": ""}   # ← direct connection
+                self._proxy_info = None
 
         # ── Create persistent requests session ────────────────
         # requests.Session() stores the APIC-cookie automatically

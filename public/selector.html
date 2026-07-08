@@ -370,8 +370,24 @@
 
   <script>
     // ── Session guard ─────────────────────────────────────────
-    const session = JSON.parse(sessionStorage.getItem('aci_session') || 'null');
+    var session = JSON.parse(sessionStorage.getItem('aci_session') || 'null');
     if (!session) window.location.href = '/index.html';
+
+    // ── Sanitise proxyYaml read from sessionStorage ───────────
+    // JSON.parse restores null correctly, but guard against
+    // the string "null" just in case
+    function sanitiseProxy(val) {
+      if (val === null || val === undefined)  return null;
+      if (typeof val === 'string') {
+        var trimmed = val.trim();
+        if (trimmed === '' || trimmed === 'null') return null;
+        return trimmed;
+      }
+      return null;
+    }
+
+    var safeProxyYaml = sanitiseProxy(session.proxyYaml);
+
 
     document.getElementById('sessionInfo').textContent =
       `APIC: ${session.apicIp} | Nodes: ${session.nodeIds.join(', ')}`;
@@ -404,19 +420,20 @@
     async function runCommands() {
       if (selectedCommands.size === 0) return;
 
-      const terminal = document.getElementById('terminalOutput');
+      var terminal = document.getElementById('terminalOutput');
       terminal.innerHTML = '';
       document.getElementById('btnRun').disabled = true;
       document.getElementById('btnCompare').classList.remove('visible');
 
-      const body = {
-        apicIp:   session.apicIp,
-        username: session.username,
-        password: session.password,
-        nodeIds:  session.nodeIds,
-        commands: [...selectedCommands]
+      var body = {
+        apicIp:    session.apicIp,
+        username:  session.username,
+        password:  session.password,
+        nodeIds:   session.nodeIds,
+        commands:  Array.from(selectedCommands),
+        apiPort:   session.apiPort   || '443',
+        proxyYaml: safeProxyYaml          // ← null if not provided
       };
-
       // Use fetch + ReadableStream for SSE-like streaming over POST
       const response = await fetch('/api/commands/run', {
         method: 'POST',

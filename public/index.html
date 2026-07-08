@@ -255,47 +255,53 @@
 
     // ── Form submit ───────────────────────────────────────────
     document.getElementById('loginForm').addEventListener('submit', function (e) {
-      e.preventDefault();
+    e.preventDefault();
 
-      const errorBanner = document.getElementById('errorBanner');
-      errorBanner.style.display = 'none';
+    var errorBanner = document.getElementById('errorBanner');
+    errorBanner.style.display = 'none';
 
-      const apicIp   = document.getElementById('apicIp').value.trim();
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value;
-      const nodeRaw  = document.getElementById('nodeIds').value.trim();
-      const apiPort   = document.getElementById('apiPort').value.trim()   || '443';
-      const proxyYaml = document.getElementById('proxyYaml').value.trim() || null;
+    var apicIp    = document.getElementById('apicIp').value.trim();
+    var username  = document.getElementById('username').value.trim();
+    var password  = document.getElementById('password').value;
+    var nodeRaw   = document.getElementById('nodeIds').value.trim();
+    var apiPort   = document.getElementById('apiPort').value.trim() || '443';
 
-      // Basic validation
-      if (!apicIp || !username || !password || !nodeRaw) {
-        errorBanner.textContent = 'All fields are required.';
-        errorBanner.style.display = 'block';
-        return;
-      }
+    // ── Proxy YAML — treat empty / whitespace as null ─────────
+    var proxyRaw  = document.getElementById('proxyYaml').value.trim();
+    var proxyYaml = (proxyRaw === '' || proxyRaw === 'null') ? null : proxyRaw;
 
-      let nodeIds;
-      try {
-        nodeIds = parseNodeIds(nodeRaw);
-        if (nodeIds.length === 0) throw new Error('No valid node IDs found.');
-      } catch (err) {
-        errorBanner.textContent = `Node ID error: ${err.message}`;
-        errorBanner.style.display = 'block';
-        return;
-      }
+    // Basic validation
+    if (!apicIp || !username || !password || !nodeRaw) {
+      errorBanner.textContent    = 'All fields are required.';
+      errorBanner.style.display  = 'block';
+      return;
+    }
 
-      // Store in sessionStorage — credentials never written to disk
-      sessionStorage.setItem('aci_session', JSON.stringify({
-        apicIp,
-        username,
-        password,
-        nodeIds,
-        apiPort,      
-        proxyYaml      
-      }));
+    var nodeIds;
+    try {
+      nodeIds = parseNodeIds(nodeRaw);
+      if (nodeIds.length === 0) throw new Error('No valid node IDs found.');
+    } catch (err) {
+      errorBanner.textContent   = 'Node ID error: ' + err.message;
+      errorBanner.style.display = 'block';
+      return;
+    }
 
-      window.location.href = '/selector.html';
-    });
+    // ── Store in sessionStorage ───────────────────────────────
+    // proxyYaml is stored as null (not the string "null")
+    // JSON.stringify(null) → "null" but JSON.parse("null") → null
+    // so round-trip is safe
+    sessionStorage.setItem('aci_session', JSON.stringify({
+      apicIp:    apicIp,
+      username:  username,
+      password:  password,
+      nodeIds:   nodeIds,
+      apiPort:   apiPort,
+      proxyYaml: proxyYaml    // null if not provided
+    }));
+
+    window.location.href = '/selector.html';
+  });
   </script>
 </body>
 </html>
