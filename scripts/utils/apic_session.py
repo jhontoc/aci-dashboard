@@ -2,30 +2,6 @@
 apic_session.py
 Cisco APIC REST API session manager.
 
-Proxy logic is owned by aci_auth_Proxy.py (same utils/ folder).
-This module imports load_proxy_from_yaml() and build_proxy()
-directly from it — no duplication.
-
-Usage:
-  # Direct connection
-  session = ApicSession(
-      apic_ip  = '10.0.0.1',
-      username = 'admin',
-      password = '****'
-  )
-
-  # With SOCKS5 proxy
-  session = ApicSession(
-      apic_ip    = '10.0.0.1',
-      username   = 'admin',
-      password   = '****',
-      api_port   = '443',
-      proxy_yaml = '/app/config/proxy_filename.yaml'
-  )
-
-  # As context manager — guarantees logout on exit
-  with ApicSession(...) as session:
-      data = session.get('/api/node/mo/...')
 """
 
 import json
@@ -65,20 +41,6 @@ def _validate_socks5(protocol: str) -> None:
 
 # ── ApicSession ───────────────────────────────────────────────
 class ApicSession:
-    """
-    Manages a persistent authenticated session to a Cisco APIC.
-
-    Responsibilities:
-      - Login  via POST /api/aaaLogin.json
-      - Cookie-based auth on all subsequent requests
-                (handled automatically by requests.Session)
-      - Optional SOCKS5 / HTTP proxy
-                (settings loaded from YAML via aci_auth_Proxy.py)
-      - Token + node storage
-      - Session refresh via GET  /api/aaaRefresh.json
-      - Explicit logout via POST /api/aaaLogout.json
-      - Context manager support  (with statement)
-    """
 
     def __init__(
         self,
@@ -90,21 +52,7 @@ class ApicSession:
         verify_ssl: bool = False,
         timeout:    int  = 30
     ):
-        """
-        Parameters
-        ----------
-        apic_ip    : APIC controller IP or hostname
-        username   : APIC login username
-        password   : APIC login password
-        api_port   : API port (default 443)
-        proxy_yaml : Path to proxy YAML file (optional).
-                     Loaded via load_proxy_from_yaml() from
-                     aci_auth_Proxy.py. Pass None for direct
-                     connection.
-        verify_ssl : SSL certificate verification (default False,
-                     matches cisco_aci_api.py behaviour)
-        timeout    : Request timeout in seconds (default 30)
-        """
+
         self.base_url    = f"https://{apic_ip}:{api_port}"
         self.verify_ssl  = verify_ssl
         self.timeout     = timeout
@@ -140,13 +88,7 @@ class ApicSession:
 
     # ─────────────────────────────────────────────────────────
     def _login(self, username: str, password: str) -> None:
-        """
-        POST /api/aaaLogin.json
 
-        Payload format mirrors login_data in aci_auth_Proxy.py
-        and start_connection() in cisco_aci_api.py exactly —
-        uses raw string with data= not json= parameter.
-        """
         # Raw string payload — same format as aci_auth_Proxy.py
         login_data = (
             '{ "aaaUser": { "attributes": { '

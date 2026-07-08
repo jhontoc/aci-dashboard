@@ -164,29 +164,6 @@ function diffCommandForNode(cmdKey, leftNodeData, rightNodeData) {
 //  Compare two snapshot files for a specific node.
 //  Supports multi-command unified snapshots.
 //
-//  Request body:
-//  {
-//    leftFile:  "snapshot_...json",
-//    rightFile: "snapshot_...json",
-//    nodeId:    "101",
-//    command:   "show_version"   // optional — if omitted, diffs all commands
-//  }
-//
-//  Response:
-//  {
-//    nodeId:    "101",
-//    leftFile:  "...",
-//    rightFile: "...",
-//    commands:  ["show_version", "show_interface_status"],
-//    results: {
-//      show_version: {
-//        stats: { changed, added, removed, matching },
-//        diff:  { "key": { status, left, right } }
-//      },
-//      ...
-//    },
-//    totals: { changed, added, removed, matching }
-//  }
 // ────────────────────────────────────────────────────────────
 router.post('/', function (req, res) {
   var leftFile  = req.body.leftFile;

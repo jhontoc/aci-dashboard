@@ -194,7 +194,6 @@
                autocomplete="off" />
         <div class="hint">
           Leave empty for direct connection.
-          Path must be accessible inside the Docker container.
         </div>
       </div>
 
@@ -288,9 +287,6 @@
     }
 
     // ── Store in sessionStorage ───────────────────────────────
-    // proxyYaml is stored as null (not the string "null")
-    // JSON.stringify(null) → "null" but JSON.parse("null") → null
-    // so round-trip is safe
     sessionStorage.setItem('aci_session', JSON.stringify({
       apicIp:    apicIp,
       username:  username,

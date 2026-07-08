@@ -5,9 +5,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+       - container_image=${container_image}
+       - index=${index}
     container_name: aci-dashboard
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       # Persist snapshots outside the container
       - ./data/snapshots:/app/data/snapshots
@@ -16,6 +19,8 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - SESSION_SECRET=change-this-to-a-strong-random-secret
+    env_file:
+      - .env
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]

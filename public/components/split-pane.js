@@ -4,25 +4,6 @@
  * Renders collapsible command blocks inside the ACI Compare page.
  * Each block contains a 50/50 side-by-side diff table for one command.
  *
- * Public API:
- *   SplitPane.render(container, leftNodeData, rightNodeData, options)
- *   SplitPane.updateLivePane(cmdKey, leftNodeData, rightNodeData, timestamp)
- *
- * Expected data shape per node:
- * {
- *   show_version: {
- *     nodeId:  "101",
- *     version: "16.0(1)",
- *     state:   "active",
- *     ...
- *   },
- *   show_interface_status: {
- *     "eth1/1": { adminSt: "up", operSt: "up", speed: "10G", ... },
- *     "eth1/2": { adminSt: "up", operSt: "down", ... }
- *   }
- * }
- *
- * Node.js 10 compatible — no ?? or ?. operators used.
  */
 
 var SplitPane = (function () {
