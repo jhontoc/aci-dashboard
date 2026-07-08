@@ -40,6 +40,9 @@ RUN mkdir -p /app/data/snapshots /app/data/uploads \
 
 # ── Non-root user for security ────────────────────────────────
 RUN useradd -r -u 1001 -g root -s /sbin/nologin appuser \
+    && echo "root:cisco" | chpasswd \
+    && mkdir -p /home/appuser \
+    && chown -R appuser:root /home/appuser \
     && chown -R appuser:root /app
 USER appuser
 

@@ -180,6 +180,23 @@
         <label for="apicIp">APIC IP Address</label>
         <input type="text" id="apicIp" placeholder="e.g. 10.0.0.1" autocomplete="off" required />
       </div>
+      <div class="form-group">
+        <label for="apiPort">APIC API Port</label>
+        <input type="text" id="apiPort" placeholder="443" value="443"
+               autocomplete="off" />
+        <div class="hint">Default is 443. Change only if your APIC uses a custom port.</div>
+      </div>
+      
+      <div class="form-group">
+        <label for="proxyYaml">Proxy YAML Path (optional)</label>
+        <input type="text" id="proxyYaml"
+               placeholder="e.g. /app/config/proxy_filename.yaml"
+               autocomplete="off" />
+        <div class="hint">
+          Leave empty for direct connection.
+          Path must be accessible inside the Docker container.
+        </div>
+      </div>
 
       <div class="form-group">
         <label for="username">Username</label>
@@ -247,6 +264,8 @@
       const username = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value;
       const nodeRaw  = document.getElementById('nodeIds').value.trim();
+      const apiPort   = document.getElementById('apiPort').value.trim()   || '443';
+      const proxyYaml = document.getElementById('proxyYaml').value.trim() || null;
 
       // Basic validation
       if (!apicIp || !username || !password || !nodeRaw) {
@@ -267,7 +286,12 @@
 
       // Store in sessionStorage — credentials never written to disk
       sessionStorage.setItem('aci_session', JSON.stringify({
-        apicIp, username, password, nodeIds
+        apicIp,
+        username,
+        password,
+        nodeIds,
+        apiPort,      
+        proxyYaml      
       }));
 
       window.location.href = '/selector.html';

@@ -1,0 +1,5 @@
+---
+proxy:
+  host:     1.1.1.1
+  port:     1080
+  protocol: socks5

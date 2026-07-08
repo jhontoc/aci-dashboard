@@ -1,16 +1,16 @@
 aci-dashboard/
 ├── Dockerfile
 ├── docker-compose.yml
-├── package.json
+├── package.json 
 ├── server.js                    ← Express entry point
 ├── routes/
-│   ├── auth.js                  ← Credential handling
+│   ├── auth.js x                  ← Credential handling
 │   ├── commands.js              ← Script execution trigger
 │   ├── snapshots.js             ← Save / load / export
-│   └── compare.js               ← Live vs. historical logic
+│   └── compare.js   x            ← Live vs. historical logic
 ├── scripts/
 │   ├── aci_show_version.py
-│   ├── aci_show_interface_status.py
+│   ├── aci_show_interface_status.py x
 │   └── utils/
 │       └── apic_session.py      ← Shared APIC session module
 ├── data/

@@ -10,7 +10,7 @@ services:
       - "3000:3000"
     volumes:
       # Persist snapshots outside the container
-      - aci_snapshots:/app/data/snapshots
+      - ./data/snapshots:/app/data/snapshots
       - aci_uploads:/app/data/uploads
     environment:
       - NODE_ENV=production
