@@ -14,13 +14,7 @@ var SCRIPT_MAP = {
   show_interface_status: path.join(__dirname, '../scripts/aci_show_interface_status.py')
 };
 
-// ────────────────────────────────────────────────────────────
-//  sanitiseProxy — normalise all empty / null proxy values
-//
-//  Handles every form the frontend might send:
-//    null, undefined, "", "null", "  " → returns null
-//    "/app/config/proxy.yaml"          → returns the string
-// ────────────────────────────────────────────────────────────
+
 function sanitiseProxy(val) {
   if (val === null || val === undefined) return null;
   if (typeof val !== 'string')           return null;
@@ -254,8 +248,7 @@ router.post('/run', function (req, res) {
       var ts       = now.toISOString()
         .replace(/:/g, '_')
         .replace(/\./g, '_');
-      var cmdSlug  = commands.join('__');
-      var filename = 'snapshot_' + ts + '__' + cmdSlug + '.json';
+      var filename = 'snapshot_' + ts + '.json';
       var outPath  = path.join(SNAPSHOT_DIR, filename);
 
       fs.writeFileSync(outPath, JSON.stringify(snapshot, null, 2));

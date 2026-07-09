@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ACI Dashboard — Login</title>
+  <title>ACI Dashboard — Connect</title>
   <style>
-    /* ── Reset & Base ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
@@ -18,17 +17,17 @@
       justify-content: center;
     }
 
-    /* ── Card ── */
     .card {
       background: #161b22;
       border: 1px solid #30363d;
       border-radius: 12px;
       padding: 40px 48px;
       width: 100%;
-      max-width: 480px;
+      max-width: 520px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.5);
     }
 
+    /* ── Logo ── */
     .logo {
       display: flex;
       align-items: center;
@@ -36,41 +35,39 @@
       margin-bottom: 28px;
     }
 
-    .logo svg { width: 36px; height: 36px; }
-
-    .logo-text {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #58a6ff;
-      letter-spacing: 0.5px;
-    }
-
-    .logo-sub {
-      font-size: 0.75rem;
-      color: #8b949e;
-      margin-top: 2px;
-    }
+    .logo svg       { width: 36px; height: 36px; }
+    .logo-text      { font-size: 1.4rem; font-weight: 700; color: #58a6ff; }
+    .logo-sub       { font-size: 0.75rem; color: #8b949e; margin-top: 2px; }
 
     h1 {
-      font-size: 1.1rem;
+      font-size: 1rem;
       color: #c9d1d9;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
       border-bottom: 1px solid #30363d;
       padding-bottom: 12px;
     }
 
-    /* ── Form ── */
-    .form-group {
-      margin-bottom: 18px;
+    /* ── Section label ── */
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #58a6ff;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 12px;
+      margin-top: 4px;
     }
+
+    /* ── Form groups ── */
+    .form-group { margin-bottom: 16px; }
 
     label {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: #8b949e;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       margin-bottom: 6px;
     }
 
@@ -82,40 +79,210 @@
       border-radius: 6px;
       padding: 10px 14px;
       color: #e6edf3;
-      font-size: 0.95rem;
-      transition: border-color 0.2s;
+      font-size: 0.92rem;
       outline: none;
+      transition: border-color 0.2s;
     }
 
     input[type="text"]:focus,
     input[type="password"]:focus {
       border-color: #58a6ff;
-      box-shadow: 0 0 0 3px rgba(88,166,255,0.12);
+      box-shadow: 0 0 0 3px rgba(88,166,255,0.1);
     }
 
     .hint {
-      font-size: 0.73rem;
+      font-size: 0.72rem;
       color: #6e7681;
-      margin-top: 5px;
+      margin-top: 4px;
     }
 
     .divider {
       border: none;
       border-top: 1px solid #30363d;
-      margin: 24px 0;
+      margin: 20px 0;
     }
 
-    .section-label {
-      font-size: 0.8rem;
+    /* ── Proxy Toggle ── */
+    .proxy-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    .proxy-row-left { display: flex; flex-direction: column; gap: 3px; }
+
+    .proxy-label {
+      font-size: 0.85rem;
       font-weight: 600;
-      color: #58a6ff;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin-bottom: 14px;
+      color: #c9d1d9;
     }
 
-    /* ── Button ── */
-    .btn-primary {
+    .proxy-path {
+      font-size: 0.72rem;
+      color: #6e7681;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Toggle switch */
+    .toggle-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      min-width: 28px;
+      text-align: right;
+    }
+
+    .toggle-status.on  { color: #3fb950; }
+    .toggle-status.off { color: #6e7681; }
+
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .toggle input { display: none; }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #30363d;
+      border-radius: 24px;
+      transition: background 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px;
+      left: 3px;
+      transition: transform 0.2s;
+    }
+
+    .toggle input:checked + .toggle-slider { background: #238636; }
+    .toggle input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    /* ── Node Group Rows ── */
+    .node-groups-wrap { display: flex; flex-direction: column; gap: 8px; }
+
+    .node-group-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .group-select {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      color: #e6edf3;
+      padding: 9px 10px;
+      font-size: 0.88rem;
+      width: 90px;
+      outline: none;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .group-select:focus { border-color: #58a6ff; }
+
+    .group-node-input {
+      flex: 1;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 9px 12px;
+      color: #e6edf3;
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .group-node-input:focus { border-color: #58a6ff; }
+
+    .btn-add-group {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #58a6ff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+      line-height: 1;
+    }
+
+    .btn-add-group:hover    { background: #30363d; }
+    .btn-add-group:disabled {
+      color: #484f58;
+      cursor: not-allowed;
+    }
+
+    .btn-remove-group {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: transparent;
+      border: 1px solid #30363d;
+      color: #6e7681;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+      line-height: 1;
+    }
+
+    .btn-remove-group:hover { background: rgba(248,81,73,0.1); color: #f85149; border-color: #f85149; }
+
+    .group-label {
+      font-size: 0.7rem;
+      color: #6e7681;
+      white-space: nowrap;
+      flex-shrink: 0;
+      width: 50px;
+      text-align: center;
+    }
+
+    .node-group-header {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .node-group-header span {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #6e7681;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* ── Connect Button ── */
+    .btn-connect {
       width: 100%;
       background: #238636;
       color: #fff;
@@ -123,181 +290,464 @@
       border-radius: 6px;
       padding: 12px;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s;
-      margin-top: 8px;
+      margin-top: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
+      transition: background 0.2s;
     }
 
-    .btn-primary:hover { background: #2ea043; }
-    .btn-primary:active { background: #1a7f37; }
+    .btn-connect:hover:not(:disabled) { background: #2ea043; }
+    .btn-connect:disabled {
+      background: #21262d;
+      color: #484f58;
+      cursor: not-allowed;
+    }
 
-    /* ── Error Banner ── */
-    .error-banner {
+    /* ── Status Banner ── */
+    .status-banner {
       display: none;
-      background: rgba(248,81,73,0.12);
-      border: 1px solid #f85149;
       border-radius: 6px;
       padding: 10px 14px;
-      font-size: 0.85rem;
-      color: #f85149;
-      margin-bottom: 18px;
+      font-size: 0.83rem;
+      margin-bottom: 16px;
+      align-items: center;
+      gap: 8px;
     }
+
+    .status-banner.error {
+      background: rgba(248,81,73,0.1);
+      border: 1px solid #f85149;
+      color: #f85149;
+    }
+
+    .status-banner.success {
+      background: rgba(63,185,80,0.1);
+      border: 1px solid #3fb950;
+      color: #3fb950;
+    }
+
+    .status-banner.loading {
+      background: rgba(88,166,255,0.1);
+      border: 1px solid #58a6ff;
+      color: #58a6ff;
+    }
+
+    .status-banner.show { display: flex; }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="card">
+<div class="card">
 
-    <!-- Logo -->
-    <div class="logo">
-      <svg viewBox="0 0 36 36" fill="none">
-        <circle cx="18" cy="18" r="17" stroke="#58a6ff" stroke-width="2"/>
-        <path d="M10 22 Q18 10 26 22" stroke="#58a6ff" stroke-width="2.5"
-              fill="none" stroke-linecap="round"/>
-        <circle cx="18" cy="20" r="3" fill="#58a6ff"/>
-      </svg>
-      <div>
-        <div class="logo-text">ACI Dashboard</div>
-        <div class="logo-sub">Node Comparison Tool</div>
+  <!-- Logo -->
+  <div class="logo">
+    <svg viewBox="0 0 36 36" fill="none">
+      <circle cx="18" cy="18" r="17" stroke="#58a6ff" stroke-width="2"/>
+      <path d="M10 22 Q18 10 26 22" stroke="#58a6ff" stroke-width="2.5"
+            fill="none" stroke-linecap="round"/>
+      <circle cx="18" cy="20" r="3" fill="#58a6ff"/>
+    </svg>
+    <div>
+      <div class="logo-text">ACI Dashboard</div>
+      <div class="logo-sub">Node Comparison Tool</div>
+    </div>
+  </div>
+
+  <h1>Connect to APIC</h1>
+
+  <!-- Status Banner -->
+  <div class="status-banner" id="statusBanner"></div>
+
+  <form id="connectForm" novalidate>
+
+    <!-- ── APIC Connection ── -->
+    <div class="section-label">APIC Connection</div>
+
+    <!-- Proxy Toggle -->
+    <div class="proxy-row">
+      <div class="proxy-row-left">
+        <span class="proxy-label">Proxy</span>
+        <span class="proxy-path" id="proxyPathLabel">
+          /app/config/proxy_filename.yaml
+        </span>
+      </div>
+      <div class="toggle-wrap">
+        <span class="toggle-status on" id="toggleStatus">ON</span>
+        <label class="toggle">
+          <input type="checkbox" id="proxyToggle" checked/>
+          <span class="toggle-slider"></span>
+        </label>
       </div>
     </div>
 
-    <h1>Connect to APIC</h1>
+    <!-- APIC IP -->
+    <div class="form-group">
+      <label for="apicIp">APIC IP Address</label>
+      <input type="text" id="apicIp"
+             placeholder="e.g. 169.25.204.52"
+             autocomplete="off" required/>
+    </div>
 
-    <!-- Error Banner -->
-    <div class="error-banner" id="errorBanner"></div>
+    <!-- Username -->
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username"
+             placeholder="admin"
+             autocomplete="off" required/>
+    </div>
 
-    <form id="loginForm" novalidate>
+    <hr class="divider"/>
 
-      <!-- APIC Section -->
-      <div class="section-label">APIC Connection</div>
+    <!-- ── Target Nodes ── -->
+    <div class="section-label">Target Nodes</div>
 
-      <div class="form-group">
-        <label for="apicIp">APIC IP Address</label>
-        <input type="text" id="apicIp" placeholder="e.g. 10.0.0.1" autocomplete="off" required />
+    <!-- Column headers -->
+    <div class="node-group-header">
+      <span style="width:90px; flex-shrink:0;">Group</span>
+      <span style="flex:1;">Node IDs</span>
+      <span style="width:74px;"></span>
+    </div>
+
+    <!-- Node group rows container -->
+    <div class="node-groups-wrap" id="nodeGroupsWrap">
+      <!-- First row — always present, cannot be removed -->
+    </div>
+
+    <div class="hint" style="margin-top:6px;">
+      Node IDs: single (101), range (101-105), or mixed (101,103-106).
+      Up to 4 groups. Group number controls nav bar order on Compare page.
+    </div>
+
+    <hr class="divider"/>
+
+    <!-- Password — last field -->
+    <div class="form-group">
+      <label for="password">Password (RSA OTP)</label>
+      <input type="password" id="password"
+             placeholder="Enter OTP password" required/>
+      <div class="hint">
+        Password is used once to authenticate. A background refresh
+        keeps the session alive without re-entering credentials.
       </div>
-      <div class="form-group">
-        <label for="apiPort">APIC API Port</label>
-        <input type="text" id="apiPort" placeholder="443" value="443"
-               autocomplete="off" />
-        <div class="hint">Default is 443. Change only if your APIC uses a custom port.</div>
-      </div>
-      
-      <div class="form-group">
-        <label for="proxyYaml">Proxy YAML Path (optional)</label>
-        <input type="text" id="proxyYaml"
-               placeholder="e.g. /app/config/proxy_filename.yaml"
-               autocomplete="off" />
-        <div class="hint">
-          Leave empty for direct connection.
-        </div>
-      </div>
+    </div>
 
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="admin" autocomplete="off" required />
-      </div>
+    <!-- Connect Button -->
+    <button type="submit" class="btn-connect" id="btnConnect">
+      Connect
+    </button>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" placeholder="••••••••" required />
-      </div>
+  </form>
+</div>
 
-      <hr class="divider"/>
+<script>
+  // ── Constants ─────────────────────────────────────────────
+  var PROXY_PATH    = '/app/config/proxy_filename.yaml';
+  var MAX_GROUPS    = 4;
+  var groupCount    = 0;
 
-      <!-- Node Section -->
-      <div class="section-label">Target Nodes</div>
+  // ── Proxy toggle ──────────────────────────────────────────
+  var proxyToggle = document.getElementById('proxyToggle');
+  var toggleStatus = document.getElementById('toggleStatus');
+  var proxyPathLabel = document.getElementById('proxyPathLabel');
 
-      <div class="form-group">
-        <label for="nodeIds">Node IDs</label>
-        <input type="text" id="nodeIds"
-               placeholder="e.g. 101,102 or 101-105 or 101,103-106"
-               autocomplete="off" required />
-        <div class="hint">
-          Accepts single IDs (101), ranges (101-105), or mixed (101,103-106)
-        </div>
-      </div>
+  proxyToggle.addEventListener('change', function () {
+    if (this.checked) {
+      toggleStatus.textContent = 'ON';
+      toggleStatus.className   = 'toggle-status on';
+      proxyPathLabel.textContent = PROXY_PATH;
+    } else {
+      toggleStatus.textContent = 'OFF';
+      toggleStatus.className   = 'toggle-status off';
+      proxyPathLabel.textContent = 'Direct connection';
+    }
+  });
 
-      <button type="submit" class="btn-primary">
-        <span>Next — Select Commands</span>
-        <span>→</span>
-      </button>
+  // ── Status banner ─────────────────────────────────────────
+  function showBanner(msg, type) {
+    var b       = document.getElementById('statusBanner');
+    b.className = 'status-banner ' + type + ' show';
+    b.innerHTML = (type === 'loading'
+      ? '<span class="spinner"></span>'
+      : '') + '<span>' + msg + '</span>';
+  }
 
-    </form>
-  </div>
+  function hideBanner() {
+    document.getElementById('statusBanner').className = 'status-banner';
+  }
 
-  <script>
-    // ── Node ID range parser ──────────────────────────────────
-    function parseNodeIds(input) {
-      const result = new Set();
-      const parts  = input.split(',').map(s => s.trim()).filter(Boolean);
+  // ── Node ID range parser ──────────────────────────────────
+  function parseNodeIds(input) {
+    var result = [];
+    var seen   = {};
+    var parts  = input.split(',').map(function (s) { return s.trim(); })
+                       .filter(Boolean);
 
-      for (const part of parts) {
-        if (part.includes('-')) {
-          const [start, end] = part.split('-').map(Number);
-          if (isNaN(start) || isNaN(end) || start > end) {
-            throw new Error(`Invalid range: "${part}"`);
-          }
-          for (let i = start; i <= end; i++) result.add(String(i));
-        } else {
-          const n = Number(part);
-          if (isNaN(n)) throw new Error(`Invalid node ID: "${part}"`);
-          result.add(String(n));
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i];
+      if (part.indexOf('-') !== -1) {
+        var range = part.split('-');
+        var start = parseInt(range[0], 10);
+        var end   = parseInt(range[1], 10);
+        if (isNaN(start) || isNaN(end) || start > end) {
+          throw new Error('Invalid range: "' + part + '"');
+        }
+        for (var n = start; n <= end; n++) {
+          if (!seen[n]) { result.push(String(n)); seen[n] = true; }
+        }
+      } else {
+        var num = parseInt(part, 10);
+        if (isNaN(num)) throw new Error('Invalid node ID: "' + part + '"');
+        if (!seen[num]) { result.push(String(num)); seen[num] = true; }
+      }
+    }
+    return result;
+  }
+
+  // ── Build a node group row ────────────────────────────────
+  function buildGroupRow(groupNum, isFirst) {
+    var row        = document.createElement('div');
+    row.className  = 'node-group-row';
+    row.dataset.groupRow = groupNum;
+
+    // Group select
+    var select       = document.createElement('select');
+    select.className = 'group-select';
+    select.name      = 'groupId';
+    select.setAttribute('aria-label', 'Group ID');
+
+    for (var g = 1; g <= MAX_GROUPS; g++) {
+      var opt       = document.createElement('option');
+      opt.value     = g;
+      opt.textContent = 'Group ' + g;
+      if (g === groupNum) opt.selected = true;
+      select.appendChild(opt);
+    }
+
+    // Node IDs input
+    var input       = document.createElement('input');
+    input.type      = 'text';
+    input.className = 'group-node-input';
+    input.placeholder = 'e.g. 101,102-105';
+    input.name      = 'nodeIds';
+
+    // Add (+) button — only on the last row
+    var addBtn       = document.createElement('button');
+    addBtn.type      = 'button';
+    addBtn.className = 'btn-add-group';
+    addBtn.textContent = '+';
+    addBtn.title     = 'Add another group';
+    addBtn.addEventListener('click', addGroupRow);
+
+    // Remove (×) button — hidden on first row
+    var removeBtn       = document.createElement('button');
+    removeBtn.type      = 'button';
+    removeBtn.className = 'btn-remove-group';
+    removeBtn.textContent = '×';
+    removeBtn.title     = 'Remove this group';
+    removeBtn.style.visibility = isFirst ? 'hidden' : 'visible';
+    removeBtn.addEventListener('click', function () {
+      removeGroupRow(row);
+    });
+
+    row.appendChild(select);
+    row.appendChild(input);
+    row.appendChild(addBtn);
+    row.appendChild(removeBtn);
+
+    return row;
+  }
+
+  // ── Add a new group row ───────────────────────────────────
+  function addGroupRow() {
+    if (groupCount >= MAX_GROUPS) return;
+
+    var wrap = document.getElementById('nodeGroupsWrap');
+
+    // Hide the (+) button on all existing rows
+    var existingRows = wrap.querySelectorAll('.node-group-row');
+    for (var i = 0; i < existingRows.length; i++) {
+      var addBtns = existingRows[i].querySelectorAll('.btn-add-group');
+      for (var j = 0; j < addBtns.length; j++) {
+        addBtns[j].style.display = 'none';
+      }
+    }
+
+    groupCount++;
+    var newRow = buildGroupRow(groupCount, false);
+    wrap.appendChild(newRow);
+
+    // Disable add button if at max
+    if (groupCount >= MAX_GROUPS) {
+      var lastAdd = newRow.querySelector('.btn-add-group');
+      if (lastAdd) lastAdd.disabled = true;
+    }
+  }
+
+  // ── Remove a group row ────────────────────────────────────
+  function removeGroupRow(row) {
+    var wrap = document.getElementById('nodeGroupsWrap');
+    wrap.removeChild(row);
+    groupCount--;
+
+    // Show (+) button on the new last row
+    var rows = wrap.querySelectorAll('.node-group-row');
+    for (var i = 0; i < rows.length; i++) {
+      var addBtns = rows[i].querySelectorAll('.btn-add-group');
+      for (var j = 0; j < addBtns.length; j++) {
+        addBtns[j].style.display = i === rows.length - 1 ? 'flex' : 'none';
+        addBtns[j].disabled      = false;
+      }
+    }
+  }
+
+  // ── Initialise first row ──────────────────────────────────
+  (function init() {
+    groupCount = 1;
+    var wrap   = document.getElementById('nodeGroupsWrap');
+    wrap.appendChild(buildGroupRow(1, true));
+  })();
+
+  // ── Collect all group node data from form ─────────────────
+  function collectGroups() {
+    var wrap   = document.getElementById('nodeGroupsWrap');
+    var rows   = wrap.querySelectorAll('.node-group-row');
+    var groups = [];    // [ { groupId: 1, nodeIds: ["101","102"] } ]
+
+    for (var i = 0; i < rows.length; i++) {
+      var row     = rows[i];
+      var groupId = parseInt(row.querySelector('.group-select').value, 10);
+      var rawIds  = row.querySelector('.group-node-input').value.trim();
+
+      if (!rawIds) {
+        throw new Error('Group ' + groupId + ' has no node IDs entered.');
+      }
+
+      var nodeIds = parseNodeIds(rawIds);
+      if (nodeIds.length === 0) {
+        throw new Error('Group ' + groupId + ' has no valid node IDs.');
+      }
+
+      groups.push({ groupId: groupId, nodeIds: nodeIds });
+    }
+
+    // Check for duplicate group IDs
+    var usedGroups = {};
+    for (var gi = 0; gi < groups.length; gi++) {
+      var gid = groups[gi].groupId;
+      if (usedGroups[gid]) {
+        throw new Error('Group ' + gid + ' is used more than once.');
+      }
+      usedGroups[gid] = true;
+    }
+
+    return groups;
+  }
+
+  // ── APIC Authentication via backend ──────────────────────
+  function authenticateApic(apicIp, username, password, proxyYaml) {
+    return fetch('/api/auth/connect', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        apicIp:    apicIp,
+        username:  username,
+        password:  password,
+        proxyYaml: proxyYaml
+      })
+    })
+    .then(function (res) { return res.json(); });
+  }
+
+  // ── Form submit ───────────────────────────────────────────
+  document.getElementById('connectForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    hideBanner();
+
+    var apicIp   = document.getElementById('apicIp').value.trim();
+    var username = document.getElementById('username').value.trim();
+    var password = document.getElementById('password').value;
+    var useProxy = document.getElementById('proxyToggle').checked;
+    var proxyYaml = useProxy ? PROXY_PATH : null;
+
+    // Basic field validation
+    if (!apicIp || !username || !password) {
+      showBanner('All fields are required.', 'error');
+      return;
+    }
+
+    // Collect node groups
+    var groups;
+    try {
+      groups = collectGroups();
+    } catch (err) {
+      showBanner(err.message, 'error');
+      return;
+    }
+
+    // Flatten all nodeIds across groups for script use
+    var allNodeIds = [];
+    for (var gi = 0; gi < groups.length; gi++) {
+      var gNodeIds = groups[gi].nodeIds;
+      for (var ni = 0; ni < gNodeIds.length; ni++) {
+        if (allNodeIds.indexOf(gNodeIds[ni]) === -1) {
+          allNodeIds.push(gNodeIds[ni]);
         }
       }
-      return [...result];
     }
 
-    // ── Form submit ───────────────────────────────────────────
-    document.getElementById('loginForm').addEventListener('submit', function (e) {
-    e.preventDefault();
+    // Disable button and show loading
+    var btn = document.getElementById('btnConnect');
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner"></span> Authenticating…';
+    showBanner('Connecting to APIC ' + apicIp + '…', 'loading');
 
-    var errorBanner = document.getElementById('errorBanner');
-    errorBanner.style.display = 'none';
+    // Authenticate with APIC
+    authenticateApic(apicIp, username, password, proxyYaml)
+      .then(function (result) {
+        if (!result.success) {
+          throw new Error(result.error || 'Authentication failed.');
+        }
 
-    var apicIp    = document.getElementById('apicIp').value.trim();
-    var username  = document.getElementById('username').value.trim();
-    var password  = document.getElementById('password').value;
-    var nodeRaw   = document.getElementById('nodeIds').value.trim();
-    var apiPort   = document.getElementById('apiPort').value.trim() || '443';
+        // ── Store session — credentials + groups ────────────
+        sessionStorage.setItem('aci_session', JSON.stringify({
+          apicIp:    apicIp,
+          username:  username,
+          password:  password,
+          nodeIds:   allNodeIds,
+          groups:    groups,        // [ { groupId, nodeIds } ]
+          apiPort:   '443',
+          proxyYaml: proxyYaml
+        }));
 
-    // ── Proxy YAML — treat empty / whitespace as null ─────────
-    var proxyRaw  = document.getElementById('proxyYaml').value.trim();
-    var proxyYaml = (proxyRaw === '' || proxyRaw === 'null') ? null : proxyRaw;
+        showBanner('Authentication successful. Redirecting…', 'success');
 
-    // Basic validation
-    if (!apicIp || !username || !password || !nodeRaw) {
-      errorBanner.textContent    = 'All fields are required.';
-      errorBanner.style.display  = 'block';
-      return;
-    }
-
-    var nodeIds;
-    try {
-      nodeIds = parseNodeIds(nodeRaw);
-      if (nodeIds.length === 0) throw new Error('No valid node IDs found.');
-    } catch (err) {
-      errorBanner.textContent   = 'Node ID error: ' + err.message;
-      errorBanner.style.display = 'block';
-      return;
-    }
-
-    // ── Store in sessionStorage ───────────────────────────────
-    sessionStorage.setItem('aci_session', JSON.stringify({
-      apicIp:    apicIp,
-      username:  username,
-      password:  password,
-      nodeIds:   nodeIds,
-      apiPort:   apiPort,
-      proxyYaml: proxyYaml    // null if not provided
-    }));
-
-    window.location.href = '/selector.html';
+        // Small delay so user sees the success message
+        setTimeout(function () {
+          window.location.href = '/selector.html';
+        }, 800);
+      })
+      .catch(function (err) {
+        showBanner('Connection failed: ' + err.message, 'error');
+        btn.disabled  = false;
+        btn.innerHTML = 'Connect';
+      });
   });
-  </script>
+</script>
 </body>
 </html>

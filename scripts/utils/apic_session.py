@@ -66,7 +66,11 @@ class ApicSession:
             # load_proxy_from_yaml() — from aci_auth_Proxy.py
             self._proxy_info = load_proxy_from_yaml(proxy_yaml)
             _validate_socks5(self._proxy_info['protocol'])
-            self.proxies = build_proxy(...)
+            self.proxies = build_proxy(
+                self._proxy_info['protocol'],
+                self._proxy_info['host'],
+                self._proxy_info['port']
+            )
 
         else:
             # No proxy — empty strings match aci_auth_Proxy.py

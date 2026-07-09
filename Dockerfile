@@ -1,5 +1,5 @@
 ARG container_image
-ARG index
+
 
 # ── Base image ───────────────────────────────────────────────
 FROM ${container_image}
@@ -22,6 +22,7 @@ RUN yum install -y gcc libffi-devel openssl-devel python3.11 bzip2-devel openssh
 RUN yum install -y nodejs
 RUN yum install -y gcc-c++ gzip curl make
 
+ARG index
 RUN python3 -m pip install --upgrade pip setuptools ${index}
 RUN python3 -m pip install "paramiko<4.0.0" ${index}
 RUN python3 -m pip install pysocks ${index}
@@ -64,7 +65,7 @@ RUN useradd -r -u 1001 -g root -d /home/appuser appuser && \
 USER appuser
 
 # ── Port ─────────────────────────────────────────────────────
-EXPOSE 3000
+EXPOSE 3001
 
 # ── Health check ─────────────────────────────────────────────
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \

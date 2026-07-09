@@ -41,22 +41,40 @@
       gap: 6px; transition: background 0.2s; white-space: nowrap;
     }
 
-    .btn-load    { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; }
+    .btn-load {
+      background: #21262d; color: #c9d1d9;
+      border: 1px solid #30363d;
+    }
     .btn-load:hover { background: #30363d; }
 
-    .btn-export  { background: #21262d; color: #3fb950; border: 1px solid #238636; }
+    .btn-export {
+      background: #21262d; color: #3fb950;
+      border: 1px solid #238636;
+    }
     .btn-export:hover { background: #0a1a0d; }
 
-    .btn-back    { background: transparent; color: #8b949e; border: 1px solid #30363d; }
+    .btn-disconnect {
+      background: transparent; color: #f85149;
+      border: 1px solid #f85149;
+    }
+    .btn-disconnect:hover { background: rgba(248,81,73,0.1); }
+
+    .btn-back {
+      background: transparent; color: #8b949e;
+      border: 1px solid #30363d;
+    }
     .btn-back:hover { color: #c9d1d9; }
 
-    .btn-cancel  { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+    .btn-cancel {
+      background: #21262d; color: #8b949e;
+      border: 1px solid #30363d;
+    }
     .btn-cancel:hover { background: #30363d; }
 
     .btn-confirm {
       background: #238636; color: #fff; border: none;
     }
-    .btn-confirm:hover { background: #2ea043; }
+    .btn-confirm:hover:not(:disabled) { background: #2ea043; }
     .btn-confirm:disabled {
       background: #21262d; color: #484f58; cursor: not-allowed;
     }
@@ -119,7 +137,6 @@
 
     .diff-stat { display: flex; align-items: center; gap: 5px; }
     .dot       { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-
     .dot-changed { background: #d29922; }
     .dot-added   { background: #3fb950; }
     .dot-removed { background: #f85149; }
@@ -127,141 +144,87 @@
 
     /* ── Modal Overlay ── */
     .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.75);
-      z-index: 200;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.75); z-index: 200;
+      align-items: center; justify-content: center;
     }
-
     .modal-overlay.open { display: flex; }
 
     .modal-box {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 10px;
-      width: 600px;
-      max-width: 95vw;
-      max-height: 85vh;
-      display: flex;
-      flex-direction: column;
+      background: #161b22; border: 1px solid #30363d;
+      border-radius: 10px; width: 600px; max-width: 95vw;
+      max-height: 85vh; display: flex; flex-direction: column;
       box-shadow: 0 16px 48px rgba(0,0,0,0.6);
     }
 
     .modal-header {
       padding: 18px 22px 14px;
       border-bottom: 1px solid #30363d;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
+      display: flex; align-items: center;
+      justify-content: space-between; flex-shrink: 0;
     }
 
     .modal-header h2 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #c9d1d9;
+      font-size: 0.95rem; font-weight: 700; color: #c9d1d9;
     }
 
     .modal-close {
-      background: none; border: none;
-      color: #6e7681; font-size: 1.1rem;
-      cursor: pointer; padding: 2px 6px;
-      border-radius: 4px; line-height: 1;
+      background: none; border: none; color: #6e7681;
+      font-size: 1.1rem; cursor: pointer;
+      padding: 2px 6px; border-radius: 4px; line-height: 1;
     }
-
     .modal-close:hover { background: #21262d; color: #c9d1d9; }
 
-    /* ── Snapshot List ── */
-    .snapshot-list-wrap {
-      overflow-y: auto;
-      flex: 1;
-      padding: 10px;
-    }
+    .snapshot-list-wrap { overflow-y: auto; flex: 1; padding: 10px; }
 
     .snapshot-item {
-      padding: 11px 14px;
-      border-radius: 6px;
-      border: 1px solid #30363d;
-      background: #0d1117;
-      margin-bottom: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      padding: 11px 14px; border-radius: 6px;
+      border: 1px solid #30363d; background: #0d1117;
+      margin-bottom: 8px; cursor: pointer;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
       transition: border-color 0.15s, background 0.15s;
     }
-
     .snapshot-item:hover    { border-color: #58a6ff; background: #0f1923; }
     .snapshot-item.selected { border-color: #238636; background: #0a1a0d; }
 
     .s-name {
       font-family: 'Courier New', monospace;
-      font-size: 0.78rem;
-      color: #c9d1d9;
-      word-break: break-all;
+      font-size: 0.78rem; color: #c9d1d9; word-break: break-all;
     }
-
-    .s-meta {
-      font-size: 0.7rem;
-      color: #6e7681;
-      margin-top: 3px;
-    }
+    .s-meta { font-size: 0.7rem; color: #6e7681; margin-top: 3px; }
 
     .s-commands {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      margin-top: 5px;
+      display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px;
     }
-
     .s-cmd-tag {
-      font-size: 0.65rem;
-      padding: 1px 6px;
-      border-radius: 4px;
-      background: rgba(88,166,255,0.1);
-      color: #58a6ff;
+      font-size: 0.65rem; padding: 1px 6px; border-radius: 4px;
+      background: rgba(88,166,255,0.1); color: #58a6ff;
       border: 1px solid rgba(88,166,255,0.2);
       font-family: 'Courier New', monospace;
     }
 
     .s-check {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      border: 2px solid #30363d;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      transition: all 0.15s;
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid #30363d; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; transition: all 0.15s;
     }
-
     .snapshot-item.selected .s-check {
-      background: #238636;
-      border-color: #238636;
-      color: #fff;
+      background: #238636; border-color: #238636; color: #fff;
     }
 
     .modal-footer {
-      padding: 14px 22px;
-      border-top: 1px solid #30363d;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      flex-shrink: 0;
+      padding: 14px 22px; border-top: 1px solid #30363d;
+      display: flex; justify-content: flex-end;
+      gap: 10px; flex-shrink: 0;
     }
 
     /* ── Spinner ── */
     .spinner {
-      display: inline-block;
-      width: 14px; height: 14px;
-      border: 2px solid #30363d;
-      border-top-color: #58a6ff;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
+      display: inline-block; width: 14px; height: 14px;
+      border: 2px solid #30363d; border-top-color: #58a6ff;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
       vertical-align: middle;
     }
 
@@ -269,22 +232,15 @@
 
     /* ── Toast ── */
     .toast {
-      position: fixed;
-      bottom: 20px; right: 20px;
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 0.82rem;
-      color: #c9d1d9;
-      z-index: 300;
+      position: fixed; bottom: 20px; right: 20px;
+      background: #161b22; border: 1px solid #30363d;
+      border-radius: 8px; padding: 10px 16px;
+      font-size: 0.82rem; color: #c9d1d9; z-index: 300;
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-      opacity: 0;
-      transform: translateY(10px);
+      opacity: 0; transform: translateY(10px);
       transition: opacity 0.25s, transform 0.25s;
       pointer-events: none;
     }
-
     .toast.show    { opacity: 1; transform: translateY(0); }
     .toast.success { border-left: 3px solid #3fb950; }
     .toast.error   { border-left: 3px solid #f85149; }
@@ -308,6 +264,10 @@
     <div class="topbar-right">
       <button class="btn btn-export" onclick="exportSnapshot()">
         ⬇ Export .tar
+      </button>
+      <button class="btn btn-disconnect" id="btnDisconnect"
+              onclick="disconnectAndReturn()">
+        ⏏ Disconnect
       </button>
     </div>
   </div>
@@ -362,14 +322,11 @@
   <!-- ── Load Snapshot Modal ─────────────────────────────── -->
   <div class="modal-overlay" id="loadModal">
     <div class="modal-box">
-
       <div class="modal-header">
         <h2>📂 Load Snapshot</h2>
         <button class="modal-close" onclick="closeLoadModal()">✕</button>
       </div>
-
       <div class="snapshot-list-wrap" id="snapshotListWrap"></div>
-
       <div class="modal-footer">
         <button class="btn btn-cancel" onclick="closeLoadModal()">
           Cancel
@@ -381,14 +338,12 @@
           Load Selected
         </button>
       </div>
-
     </div>
   </div>
 
   <!-- ── Toast ───────────────────────────────────────────── -->
   <div class="toast" id="toast"></div>
 
-  <!-- ── Component Scripts ───────────────────────────────── -->
   <script src="/components/split-pane.js"></script>
   <script src="/components/node-nav.js"></script>
 
@@ -397,27 +352,28 @@
     //  SESSION
     // ────────────────────────────────────────────────────────
     var session = JSON.parse(
-    sessionStorage.getItem('aci_session') || 'null'
+      sessionStorage.getItem('aci_session') || 'null'
     );
 
-// ── Sanitise proxyYaml from sessionStorage ────────────────
-// Handles null, undefined, "", "null" → all become null
+    // ── Sanitise proxyYaml from session ──────────────────────
     function sanitiseProxy(val) {
       if (val === null || val === undefined)  return null;
       if (typeof val === 'string') {
-        var trimmed = val.trim();
-        if (trimmed === '' || trimmed === 'null') return null;
-        return trimmed;
+        var t = val.trim();
+        if (t === '' || t === 'null') return null;
+        return t;
       }
       return null;
     }
 
-    var safeProxyYaml = sanitiseProxy(session ? session.proxyYaml : null);
+    var safeProxyYaml = sanitiseProxy(
+      session ? session.proxyYaml : null
+    );
 
     // ────────────────────────────────────────────────────────
     //  STATE
     // ────────────────────────────────────────────────────────
-    var snapshotData  = null;   // full loaded historical snapshot
+    var snapshotData  = null;   // loaded historical snapshot
     var liveDataStore = {};     // { cmdKey: { nodeId: data } }
     var currentNodeId = null;
     var selectedFile  = null;
@@ -428,11 +384,9 @@
     function showToast(msg, type, ms) {
       type = type || 'info';
       ms   = ms   || 3000;
-
-      var t = document.getElementById('toast');
+      var t       = document.getElementById('toast');
       t.textContent = msg;
       t.className   = 'toast ' + type + ' show';
-
       clearTimeout(t._timer);
       t._timer = setTimeout(function () {
         t.className = 'toast ' + type;
@@ -441,23 +395,18 @@
 
     // ────────────────────────────────────────────────────────
     //  FLATTEN — Node.js 10 compatible
-    //  No ?? or ?. operators
     // ────────────────────────────────────────────────────────
     function flattenSimple(obj, prefix) {
-      prefix = prefix || '';
+      prefix  = prefix || '';
       var out     = {};
       var entries = Object.entries(obj || {});
-
       for (var i = 0; i < entries.length; i++) {
         var k   = entries[i][0];
         var v   = entries[i][1];
         var key = prefix ? prefix + '.' + k : k;
-
         if (
-          v !== null &&
-          v !== undefined &&
-          typeof v === 'object' &&
-          !Array.isArray(v)
+          v !== null && v !== undefined &&
+          typeof v === 'object' && !Array.isArray(v)
         ) {
           var nested     = flattenSimple(v, key);
           var nestedKeys = Object.keys(nested);
@@ -465,7 +414,6 @@
             out[nestedKeys[j]] = nested[nestedKeys[j]];
           }
         } else {
-          // Node.js 10 fix — replace (v ?? '') with explicit check
           var safeVal = (v !== null && v !== undefined) ? v : '';
           out[key] = Array.isArray(v) ? JSON.stringify(v) : String(safeVal);
         }
@@ -478,17 +426,17 @@
     // ────────────────────────────────────────────────────────
     function updateDiffBar(totals) {
       document.getElementById('statChanged').textContent =
-        totals.changed + ' changed';
+        totals.changed  + ' changed';
       document.getElementById('statAdded').textContent =
-        totals.added + ' added';
+        totals.added    + ' added';
       document.getElementById('statRemoved').textContent =
-        totals.removed + ' removed';
+        totals.removed  + ' removed';
       document.getElementById('statMatch').textContent =
         totals.matching + ' matching';
     }
 
     // ────────────────────────────────────────────────────────
-    //  RECALC TOTALS — after a single command live run
+    //  RECALC TOTALS
     // ────────────────────────────────────────────────────────
     function recalcTotals() {
       if (!snapshotData || !currentNodeId) return;
@@ -503,18 +451,17 @@
       for (var ci = 0; ci < cmds.length; ci++) {
         var cmd = cmds[ci];
 
-        // Node.js 10 fix — replace liveDataStore[cmd]?.[currentNodeId]
-        var liveEntry = (liveDataStore[cmd] && liveDataStore[cmd][currentNodeId])
-          ? liveDataStore[cmd][currentNodeId]
-          : null;
+        var liveEntry = (
+          liveDataStore[cmd] &&
+          liveDataStore[cmd][currentNodeId]
+        ) ? liveDataStore[cmd][currentNodeId] : null;
 
         if (!liveEntry) continue;
 
         var leftCmd  = leftNodeData[cmd] || {};
         var leftFlat  = flattenSimple(leftCmd);
         var rightFlat = flattenSimple(liveEntry);
-
-        var allKeys = Object.keys(
+        var allKeys   = Object.keys(
           Object.assign({}, leftFlat, rightFlat)
         );
 
@@ -522,7 +469,6 @@
           var key = allKeys[ki];
           var lv  = leftFlat[key];
           var rv  = rightFlat[key];
-
           if      (lv === undefined) totals.added++;
           else if (rv === undefined) totals.removed++;
           else if (lv !== rv)        totals.changed++;
@@ -534,7 +480,7 @@
     }
 
     // ────────────────────────────────────────────────────────
-    //  RENDER COMPARISON — full re-render on node change
+    //  RENDER COMPARISON
     // ────────────────────────────────────────────────────────
     function renderComparison() {
       if (!snapshotData || !currentNodeId) return;
@@ -543,18 +489,15 @@
         ? snapshotData.commands
         : (snapshotData.command ? [snapshotData.command] : []);
 
-      // Node.js 10 fix — replace snapshotData?.nodes?.[currentNodeId]
       var leftNodeData = (
         snapshotData &&
         snapshotData.nodes &&
         snapshotData.nodes[currentNodeId]
       ) ? snapshotData.nodes[currentNodeId] : {};
 
-      // Build rightNodeData from liveDataStore for this node
       var rightNodeData = {};
       for (var ci = 0; ci < cmds.length; ci++) {
         var cmd = cmds[ci];
-        // Node.js 10 fix — replace liveDataStore[cmd]?.[currentNodeId]
         if (liveDataStore[cmd] && liveDataStore[cmd][currentNodeId]) {
           rightNodeData[cmd] = liveDataStore[cmd][currentNodeId];
         }
@@ -581,7 +524,7 @@
     }
 
     // ────────────────────────────────────────────────────────
-    //  NODE CHANGE CALLBACK — from NodeNav
+    //  NODE CHANGE CALLBACK
     // ────────────────────────────────────────────────────────
     function onNodeChange(nodeId) {
       currentNodeId = nodeId;
@@ -620,30 +563,30 @@
           wrap.innerHTML = '';
 
           files.forEach(function (entry) {
-            // Handle both object shape and plain string
             var filename = typeof entry === 'string'
-              ? entry
-              : String(entry.filename || '');
-
+              ? entry : String(entry.filename || '');
             if (!filename) return;
 
-            var commands  = entry.commands
-              ? entry.commands
-              : (entry.command ? [entry.command] : []);
+            var commands = [];
+            if (Array.isArray(entry.commands) && entry.commands.length > 0) {
+              commands = entry.commands;
+            } else if (entry.command) {
+              commands = [entry.command];
+            }
 
             var timestamp = entry.timestamp
               ? new Date(entry.timestamp).toLocaleString()
               : '—';
 
-            var nodeCount = (entry.nodeCount !== null && entry.nodeCount !== undefined)
-              ? entry.nodeCount
-              : '—';
+            var nodeCount = (
+              entry.nodeCount !== null &&
+              entry.nodeCount !== undefined
+            ) ? entry.nodeCount : '—';
 
             var sizeKB = entry.sizeBytes
               ? (entry.sizeBytes / 1024).toFixed(1) + ' KB'
               : '';
 
-            // Build command tags HTML
             var tagsHtml = '';
             for (var ti = 0; ti < commands.length; ti++) {
               tagsHtml +=
@@ -652,8 +595,8 @@
                 '</span>';
             }
 
-            var item = document.createElement('div');
-            item.className    = 'snapshot-item';
+            var item       = document.createElement('div');
+            item.className = 'snapshot-item';
             item.dataset.file = filename;
 
             item.innerHTML =
@@ -661,8 +604,12 @@
                 '<div class="s-name">' + filename + '</div>' +
                 '<div class="s-meta">' +
                   timestamp +
-                  (nodeCount !== '—' ? ' &nbsp;·&nbsp; ' + nodeCount + ' node(s)' : '') +
-                  (sizeKB ? ' &nbsp;·&nbsp; ' + sizeKB : '') +
+                  (nodeCount !== '—'
+                    ? ' &nbsp;·&nbsp; ' + nodeCount + ' node(s)'
+                    : '') +
+                  (sizeKB
+                    ? ' &nbsp;·&nbsp; ' + sizeKB
+                    : '') +
                 '</div>' +
                 (tagsHtml
                   ? '<div class="s-commands">' + tagsHtml + '</div>'
@@ -670,7 +617,6 @@
               '</div>' +
               '<div class="s-check">✓</div>';
 
-            // Click handler — inline to avoid scoping issues
             item.addEventListener('click', function () {
               var allItems = document.querySelectorAll('.snapshot-item');
               for (var i = 0; i < allItems.length; i++) {
@@ -687,20 +633,18 @@
         .catch(function (err) {
           wrap.innerHTML =
             '<div style="padding:20px; color:#f85149; font-size:0.82rem;">' +
-            '⚠ ' + err.message +
-            '</div>';
+            '⚠ ' + err.message + '</div>';
           console.error('[openLoadModal]', err);
         });
     }
 
     // ────────────────────────────────────────────────────────
-    //  CLOSE LOAD MODAL
+    //  CLOSE MODAL
     // ────────────────────────────────────────────────────────
     function closeLoadModal() {
       document.getElementById('loadModal').classList.remove('open');
     }
 
-    // Close on backdrop click
     document.getElementById('loadModal').addEventListener('click', function (e) {
       if (e.target === this) closeLoadModal();
     });
@@ -711,7 +655,7 @@
     function confirmLoad() {
       if (!selectedFile) return;
 
-      var btn = document.getElementById('btnConfirmLoad');
+      var btn       = document.getElementById('btnConfirmLoad');
       btn.disabled  = true;
       btn.innerHTML = '<span class="spinner"></span>&nbsp; Loading…';
 
@@ -721,7 +665,6 @@
           return res.json();
         })
         .then(function (data) {
-          // Validate snapshot structure
           if (!data || !data.nodes || typeof data.nodes !== 'object') {
             throw new Error('Snapshot missing "nodes" structure.');
           }
@@ -732,9 +675,8 @@
           }
 
           snapshotData  = data;
-          liveDataStore = {};   // reset live data for new snapshot
+          liveDataStore = {};
 
-          // Build commands list — support both unified and legacy shape
           var cmds = snapshotData.commands
             ? snapshotData.commands
             : (snapshotData.command ? [snapshotData.command] : []);
@@ -762,11 +704,20 @@
 
           document.getElementById('infoBar').style.display = 'flex';
 
-          // ── Init node navigation ─────────────────────────
-          NodeNav.init(nodeIds, onNodeChange);
+          // ── Sort nodeIds by group order if session has groups ──
+          var sessionGroups = (session && session.groups)
+            ? session.groups
+            : null;
+
+          var sortedNodeIds = sortNodesByGroup(nodeIds, sessionGroups);
+
+          // ── Init node navigation with group info ─────────
+          NodeNav.init(sortedNodeIds, onNodeChange, sessionGroups);
 
           closeLoadModal();
           showToast('Loaded: ' + selectedFile, 'success');
+          btn.disabled  = false;
+          btn.innerHTML = 'Load Selected';
         })
         .catch(function (err) {
           showToast('Load failed: ' + err.message, 'error', 5000);
@@ -777,8 +728,44 @@
     }
 
     // ────────────────────────────────────────────────────────
-    //  HANDLE RUN LIVE — per command block callback
-    //  Called by SplitPane when user clicks a block's Run Live
+    //  Sort node IDs by group order
+    //  Groups are ordered 1 → 4 as defined on landing page
+    // ────────────────────────────────────────────────────────
+    function sortNodesByGroup(nodeIds, groups) {
+      if (!groups || groups.length === 0) return nodeIds;
+
+      // Build ordered list following group order
+      var ordered = [];
+      var seen    = {};
+
+      // Sort groups by groupId ascending
+      var sortedGroups = groups.slice().sort(function (a, b) {
+        return a.groupId - b.groupId;
+      });
+
+      for (var gi = 0; gi < sortedGroups.length; gi++) {
+        var grpNodeIds = sortedGroups[gi].nodeIds;
+        for (var ni = 0; ni < grpNodeIds.length; ni++) {
+          var nid = grpNodeIds[ni];
+          if (!seen[nid] && nodeIds.indexOf(nid) !== -1) {
+            ordered.push(nid);
+            seen[nid] = true;
+          }
+        }
+      }
+
+      // Append any nodes not in any group at the end
+      for (var ri = 0; ri < nodeIds.length; ri++) {
+        if (!seen[nodeIds[ri]]) {
+          ordered.push(nodeIds[ri]);
+        }
+      }
+
+      return ordered;
+    }
+
+    // ────────────────────────────────────────────────────────
+    //  HANDLE RUN LIVE — per command, current node only
     // ────────────────────────────────────────────────────────
     function handleRunLive(cmdKey, btnEl) {
       if (!session || !snapshotData || !currentNodeId) return;
@@ -786,7 +773,14 @@
       btnEl.disabled  = true;
       btnEl.innerHTML = '<span class="spinner"></span> Collecting…';
 
-      var nodeIds = Object.keys(snapshotData.nodes);
+      // ── Only collect for the current node in the nav bar ──
+      var targetNodes = [currentNodeId];
+
+      console.log(
+        '[RunLive] command:', cmdKey,
+        '| node:', currentNodeId,
+        '| proxy:', safeProxyYaml || 'none'
+      );
 
       fetch('/api/commands/run', {
         method:  'POST',
@@ -795,10 +789,10 @@
           apicIp:    session.apicIp,
           username:  session.username,
           password:  session.password,
-          nodeIds:   nodeIds,
+          nodeIds:   targetNodes,        // ← current node only
           commands:  [cmdKey],
           apiPort:   session.apiPort   || '443',
-          proxyYaml: session.proxyYaml || null
+          proxyYaml: safeProxyYaml
         })
       })
       .then(function (response) {
@@ -820,7 +814,7 @@
 
             buffer += decoder.decode(result.value, { stream: true });
             var lines = buffer.split('\n');
-            buffer = lines.pop();
+            buffer    = lines.pop();
 
             for (var i = 0; i < lines.length; i++) {
               var cleaned = lines[i].replace(/^data:\s*/, '').trim();
@@ -830,74 +824,68 @@
                 var parsed = JSON.parse(cleaned);
 
                 if (parsed.snapshot_saved) {
-                  // Load the saved snapshot to extract live node data
-                  fetch('/api/snapshots/' + encodeURIComponent(parsed.snapshot_saved))
-                    .then(function (r2) { return r2.json(); })
-                    .then(function (liveSnap) {
+                  fetch(
+                    '/api/snapshots/' +
+                    encodeURIComponent(parsed.snapshot_saved)
+                  )
+                  .then(function (r2) { return r2.json(); })
+                  .then(function (liveSnap) {
 
-                      if (!liveDataStore[cmdKey]) {
-                        liveDataStore[cmdKey] = {};
-                      }
+                    if (!liveDataStore[cmdKey]) {
+                      liveDataStore[cmdKey] = {};
+                    }
 
-                      // Store per-node live data for this command
-                      for (var ni = 0; ni < nodeIds.length; ni++) {
-                        var nid = nodeIds[ni];
+                    // ── Store data only for the current node ──
+                    var nodeEntry = (
+                      liveSnap.nodes &&
+                      liveSnap.nodes[currentNodeId]
+                    ) ? liveSnap.nodes[currentNodeId] : null;
 
-                        // Node.js 10 fix — replace liveSnap.nodes?.[nid]
-                        var nodeEntry = (liveSnap.nodes && liveSnap.nodes[nid])
-                          ? liveSnap.nodes[nid]
-                          : null;
+                    if (nodeEntry) {
+                      liveDataStore[cmdKey][currentNodeId] = (
+                        nodeEntry[cmdKey] !== undefined &&
+                        nodeEntry[cmdKey] !== null
+                      ) ? nodeEntry[cmdKey] : nodeEntry;
+                    }
 
-                        if (nodeEntry) {
-                          // Node.js 10 fix — replace nodeEntry[cmdKey] ?? nodeEntry
-                          liveDataStore[cmdKey][nid] = (
-                            nodeEntry[cmdKey] !== undefined &&
-                            nodeEntry[cmdKey] !== null
-                          ) ? nodeEntry[cmdKey] : nodeEntry;
-                        }
-                      }
+                    // Update the live pane for this command
+                    var leftNodeData = snapshotData.nodes[currentNodeId] || {};
 
-                      // Update only the live pane for this command
-                      var leftNodeData = snapshotData.nodes[currentNodeId] || {};
+                    var liveForCmd = (
+                      liveDataStore[cmdKey] &&
+                      liveDataStore[cmdKey][currentNodeId]
+                    ) ? liveDataStore[cmdKey][currentNodeId] : null;
 
-                      var liveForCmd = (
-                        liveDataStore[cmdKey] &&
-                        liveDataStore[cmdKey][currentNodeId]
-                      ) ? liveDataStore[cmdKey][currentNodeId] : null;
+                    var rightForCmd = liveForCmd
+                      ? { [cmdKey]: liveForCmd }
+                      : null;
 
-                      var rightForCmd = liveForCmd
-                        ? { [cmdKey]: liveForCmd }
-                        : null;
+                    var liveTs = liveSnap.timestamp
+                      ? new Date(liveSnap.timestamp).toLocaleString()
+                      : '';
 
-                      var liveTs = liveSnap.timestamp
-                        ? new Date(liveSnap.timestamp).toLocaleString()
-                        : '';
+                    SplitPane.updateLivePane(
+                      cmdKey,
+                      leftNodeData,
+                      rightForCmd,
+                      liveTs
+                    );
 
-                      SplitPane.updateLivePane(
-                        cmdKey,
-                        leftNodeData,
-                        rightForCmd,
-                        liveTs
-                      );
+                    recalcTotals();
 
-                      recalcTotals();
-
-                      showToast(
-                        'Live data collected for ' + cmdKey.replace(/_/g, ' '),
-                        'success'
-                      );
-                    })
-                    .catch(function (fetchErr) {
-                      showToast(
-                        'Failed to load live snapshot: ' + fetchErr.message,
-                        'error',
-                        5000
-                      );
-                    });
+                    showToast(
+                      'Live data collected — Node ' + currentNodeId,
+                      'success'
+                    );
+                  })
+                  .catch(function (fetchErr) {
+                    showToast(
+                      'Failed to load live snapshot: ' + fetchErr.message,
+                      'error', 5000
+                    );
+                  });
                 }
-              } catch (parseErr) {
-                // Non-JSON progress lines — safe to ignore
-              }
+              } catch (e) { /* non-JSON stream lines */ }
             }
 
             return readStream();
@@ -915,7 +903,30 @@
     }
 
     // ────────────────────────────────────────────────────────
-    //  EXPORT SNAPSHOT
+    //  DISCONNECT — stop refresh and return to landing page
+    // ────────────────────────────────────────────────────────
+    function disconnectAndReturn() {
+      var btn       = document.getElementById('btnDisconnect');
+      btn.disabled  = true;
+      btn.innerHTML = '<span class="spinner"></span> Disconnecting…';
+
+      fetch('/api/auth/disconnect', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(function () {
+        sessionStorage.removeItem('aci_session');
+        window.location.href = '/index.html';
+      })
+      .catch(function () {
+        // Always redirect even if disconnect call fails
+        sessionStorage.removeItem('aci_session');
+        window.location.href = '/index.html';
+      });
+    }
+
+    // ────────────────────────────────────────────────────────
+    //  EXPORT
     // ────────────────────────────────────────────────────────
     function exportSnapshot() {
       if (!selectedFile) {
@@ -956,13 +967,11 @@
     }
 
     // ────────────────────────────────────────────────────────
-    //  INIT — render empty split pane on page load
+    //  INIT — render empty state on page load
     // ────────────────────────────────────────────────────────
     SplitPane.render(
       document.getElementById('splitWrapper'),
-      null,
-      null,
-      {}
+      null, null, {}
     );
 
   </script>

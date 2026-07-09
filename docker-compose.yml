@@ -10,20 +10,20 @@ services:
        - index=${index}
     container_name: aci-dashboard
     ports:
-      - "3001:3000"
+      - "3001:3001"
     volumes:
       # Persist snapshots outside the container
       - ./data/snapshots:/app/data/snapshots
       - aci_uploads:/app/data/uploads
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=3001
       - SESSION_SECRET=change-this-to-a-strong-random-secret
     env_file:
       - .env
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
