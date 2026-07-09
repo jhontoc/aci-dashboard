@@ -78,7 +78,69 @@
     .btn-confirm:disabled {
       background: #21262d; color: #484f58; cursor: not-allowed;
     }
+    .s-tags-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  align-items: center;
+}
 
+/* Node ID tag */
+.s-node-tag {
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(63,185,80,0.1);
+  color: #3fb950;
+  border: 1px solid rgba(63,185,80,0.25);
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.s-node-tag.s-node-tag-dim {
+  background: rgba(139,148,158,0.1);
+  color: #8b949e;
+  border-color: #30363d;
+}
+/* ── Tags row in snapshot list ── */
+.s-tags-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+  align-items: center;
+}
+
+/* Node ID tag */
+.s-node-tag {
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(63,185,80,0.1);
+  color: #3fb950;
+  border: 1px solid rgba(63,185,80,0.25);
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+.s-node-tag.s-node-tag-dim {
+  background: rgba(139,148,158,0.1);
+  color: #8b949e;
+  border-color: #30363d;
+}
+
+/* APIC IP tag */
+.s-apic-tag {
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(88,166,255,0.1);
+  color: #58a6ff;
+  border: 1px solid rgba(88,166,255,0.2);
+  font-family: 'Courier New', monospace;
+  margin-left: 2px;
+}
     /* ── Snapshot Info Bar ── */
     .info-bar {
       background: #0d1117;
@@ -535,108 +597,131 @@
     //  OPEN LOAD MODAL
     // ────────────────────────────────────────────────────────
     function openLoadModal() {
-      selectedFile = null;
-      document.getElementById('btnConfirmLoad').disabled = true;
-      document.getElementById('loadModal').classList.add('open');
+  selectedFile = null;
+  document.getElementById('btnConfirmLoad').disabled = true;
+  document.getElementById('loadModal').classList.add('open');
 
-      var wrap = document.getElementById('snapshotListWrap');
-      wrap.innerHTML =
-        '<div style="padding:24px; text-align:center; color:#8b949e;">' +
-        '<span class="spinner"></span>&nbsp; Loading…' +
-        '</div>';
+  var wrap = document.getElementById('snapshotListWrap');
+  wrap.innerHTML =
+    '<div style="padding:24px; text-align:center; color:#8b949e;">' +
+    '<span class="spinner"></span>&nbsp; Loading…' +
+    '</div>';
 
-      fetch('/api/snapshots')
-        .then(function (res) {
-          if (!res.ok) throw new Error('Server returned ' + res.status);
-          return res.json();
-        })
-        .then(function (files) {
-          if (!Array.isArray(files) || files.length === 0) {
-            wrap.innerHTML =
-              '<div style="padding:32px; text-align:center; color:#484f58;">' +
-              '<div style="font-size:2rem; margin-bottom:8px;">📭</div>' +
-              'No snapshots found. Run a collection first.' +
-              '</div>';
-            return;
+  fetch('/api/snapshots')
+    .then(function (res) {
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      return res.json();
+    })
+    .then(function (files) {
+      if (!Array.isArray(files) || files.length === 0) {
+        wrap.innerHTML =
+          '<div style="padding:32px; text-align:center; color:#484f58;">' +
+          '<div style="font-size:2rem; margin-bottom:8px;">📭</div>' +
+          'No snapshots found. Run a collection first.' +
+          '</div>';
+        return;
+      }
+
+      wrap.innerHTML = '';
+
+      files.forEach(function (entry) {
+        var filename = typeof entry === 'string'
+          ? entry : String(entry.filename || '');
+        if (!filename) return;
+
+        // ── Use collectedNodes for tags ──────────────────────
+        // Falls back to nodeCount display if array unavailable
+        var collectedNodes = [];
+        if (Array.isArray(entry.collectedNodes) && entry.collectedNodes.length > 0) {
+          collectedNodes = entry.collectedNodes;
+        } else if (entry.nodeCount > 0) {
+          // Legacy snapshots — show count only
+          collectedNodes = [];
+        }
+
+        // ── APIC IP from metadata ────────────────────────────
+        var apicIp    = entry.apic || '';
+
+        var timestamp = entry.timestamp
+          ? new Date(entry.timestamp).toLocaleString()
+          : '—';
+
+        var nodeCount = (
+          entry.nodeCount !== null &&
+          entry.nodeCount !== undefined
+        ) ? entry.nodeCount : '—';
+
+        var sizeKB = entry.sizeBytes
+          ? (entry.sizeBytes / 1024).toFixed(1) + ' KB'
+          : '';
+
+        // ── Build node ID tags ───────────────────────────────
+        var nodeTagsHtml = '';
+        if (collectedNodes.length > 0) {
+          for (var ni = 0; ni < collectedNodes.length; ni++) {
+            nodeTagsHtml +=
+              '<span class="s-node-tag">Node ' +
+              collectedNodes[ni] +
+              '</span>';
           }
+        } else {
+          // Legacy — show placeholder tag
+          nodeTagsHtml =
+            '<span class="s-node-tag s-node-tag-dim">' +
+            nodeCount + ' node(s)' +
+            '</span>';
+        }
 
-          wrap.innerHTML = '';
+        // ── APIC IP tag ──────────────────────────────────────
+        var apicTagHtml = apicIp
+          ? '<span class="s-apic-tag">' + apicIp + '</span>'
+          : '';
 
-          files.forEach(function (entry) {
-            var filename = typeof entry === 'string'
-              ? entry : String(entry.filename || '');
-            if (!filename) return;
+        var item       = document.createElement('div');
+        item.className = 'snapshot-item';
+        item.dataset.file = filename;
 
-            var commands = [];
-            if (Array.isArray(entry.commands) && entry.commands.length > 0) {
-              commands = entry.commands;
-            } else if (entry.command) {
-              commands = [entry.command];
-            }
+        item.innerHTML =
+          '<div style="flex:1; min-width:0;">' +
 
-            var timestamp = entry.timestamp
-              ? new Date(entry.timestamp).toLocaleString()
-              : '—';
+            // Filename
+            '<div class="s-name">' + filename + '</div>' +
 
-            var nodeCount = (
-              entry.nodeCount !== null &&
-              entry.nodeCount !== undefined
-            ) ? entry.nodeCount : '—';
+            // Meta line — timestamp · size
+            '<div class="s-meta">' +
+              timestamp +
+              (sizeKB ? ' &nbsp;·&nbsp; ' + sizeKB : '') +
+            '</div>' +
 
-            var sizeKB = entry.sizeBytes
-              ? (entry.sizeBytes / 1024).toFixed(1) + ' KB'
-              : '';
+            // Tags row — node IDs + APIC IP
+            '<div class="s-tags-row">' +
+              nodeTagsHtml +
+              apicTagHtml +
+            '</div>' +
 
-            var tagsHtml = '';
-            for (var ti = 0; ti < commands.length; ti++) {
-              tagsHtml +=
-                '<span class="s-cmd-tag">' +
-                commands[ti].replace(/_/g, ' ') +
-                '</span>';
-            }
+          '</div>' +
+          '<div class="s-check">✓</div>';
 
-            var item       = document.createElement('div');
-            item.className = 'snapshot-item';
-            item.dataset.file = filename;
-
-            item.innerHTML =
-              '<div style="flex:1; min-width:0;">' +
-                '<div class="s-name">' + filename + '</div>' +
-                '<div class="s-meta">' +
-                  timestamp +
-                  (nodeCount !== '—'
-                    ? ' &nbsp;·&nbsp; ' + nodeCount + ' node(s)'
-                    : '') +
-                  (sizeKB
-                    ? ' &nbsp;·&nbsp; ' + sizeKB
-                    : '') +
-                '</div>' +
-                (tagsHtml
-                  ? '<div class="s-commands">' + tagsHtml + '</div>'
-                  : '') +
-              '</div>' +
-              '<div class="s-check">✓</div>';
-
-            item.addEventListener('click', function () {
-              var allItems = document.querySelectorAll('.snapshot-item');
-              for (var i = 0; i < allItems.length; i++) {
-                allItems[i].classList.remove('selected');
-              }
-              this.classList.add('selected');
-              selectedFile = this.dataset.file;
-              document.getElementById('btnConfirmLoad').disabled = false;
-            });
-
-            wrap.appendChild(item);
-          });
-        })
-        .catch(function (err) {
-          wrap.innerHTML =
-            '<div style="padding:20px; color:#f85149; font-size:0.82rem;">' +
-            '⚠ ' + err.message + '</div>';
-          console.error('[openLoadModal]', err);
+        item.addEventListener('click', function () {
+          var allItems = document.querySelectorAll('.snapshot-item');
+          for (var i = 0; i < allItems.length; i++) {
+            allItems[i].classList.remove('selected');
+          }
+          this.classList.add('selected');
+          selectedFile = this.dataset.file;
+          document.getElementById('btnConfirmLoad').disabled = false;
         });
-    }
+
+        wrap.appendChild(item);
+      });
+    })
+    .catch(function (err) {
+      wrap.innerHTML =
+        '<div style="padding:20px; color:#f85149; font-size:0.82rem;">' +
+        '⚠ ' + err.message + '</div>';
+      console.error('[openLoadModal]', err);
+    });
+}
 
     // ────────────────────────────────────────────────────────
     //  CLOSE MODAL

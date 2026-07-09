@@ -10,12 +10,11 @@ var router   = express.Router();
 var SNAPSHOT_DIR = path.join(__dirname, '../data/snapshots');
 var UPLOAD_DIR   = path.join(__dirname, '../data/uploads');
 
-// ── Ensure directories exist ─────────────────────────────────
 [SNAPSHOT_DIR, UPLOAD_DIR].forEach(function (dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
-// ── Multer — accept only .tar files ──────────────────────────
+// ── Multer ────────────────────────────────────────────────────
 var storage = multer.diskStorage({
   destination: function (_req, _file, cb) { cb(null, UPLOAD_DIR); },
   filename:    function (_req, file, cb) {
@@ -34,67 +33,64 @@ var upload = multer({
     ) {
       cb(null, true);
     } else {
-      cb(new Error('Only .tar files are accepted for import.'));
+      cb(new Error('Only .tar files are accepted.'));
     }
   }
 });
 
 // ────────────────────────────────────────────────────────────
-//  Helper — resolve commands from a raw snapshot object
-//
-//  Handles all possible shapes:
-//    { commands: ["show_version", "show_interface_status"] }  ← unified
-//    { command:  "show_version" }                             ← legacy
-//    filename: snapshot_...Z__show_version.json               ← old naming
+//  Helper — resolve commands from raw snapshot
 // ────────────────────────────────────────────────────────────
 function resolveCommands(raw, filename) {
-  // Priority 1 — plural array (current unified format)
   if (Array.isArray(raw.commands) && raw.commands.length > 0) {
     return raw.commands;
   }
-
-  // Priority 2 — singular string (legacy format)
   if (raw.command && typeof raw.command === 'string') {
     return [raw.command];
   }
-
-  // Priority 3 — parse from filename
-  // Old format: snapshot_2026-07-08T17_49_34_068Z__show_version.json
-  // New format: snapshot_2026-07-08T17_49_34_068Z.json (no command in name)
   if (filename) {
     var base  = filename.replace('.json', '');
     var parts = base.split('__');
     if (parts.length > 1) {
-      // Remove the first element (snapshot_timestamp)
       parts.shift();
-      // Filter out empty strings
       var cmds = parts.filter(function (p) { return p.trim() !== ''; });
       if (cmds.length > 0) return cmds;
     }
   }
-
-  // Priority 4 — infer from node data keys
-  // If nodes: { "131": { "show_version": {...} } }
+  // Infer from node data keys
   var nodeKeys = Object.keys(raw.nodes || {});
   if (nodeKeys.length > 0) {
     var firstNode = raw.nodes[nodeKeys[0]];
     if (firstNode && typeof firstNode === 'object') {
-      var dataKeys = Object.keys(firstNode);
-      // Check if keys look like command names
       var knownCmds = ['show_version', 'show_interface_status'];
-      var found = dataKeys.filter(function (k) {
+      var found = Object.keys(firstNode).filter(function (k) {
         return knownCmds.indexOf(k) !== -1;
       });
       if (found.length > 0) return found;
     }
   }
-
   return [];
 }
 
 // ────────────────────────────────────────────────────────────
+//  Helper — resolve collected node IDs from raw snapshot
+//
+//  Priority:
+//    1. raw.collectedNodes  (set by commands.js saveSnapshot)
+//    2. Object.keys(raw.nodes)
+// ────────────────────────────────────────────────────────────
+function resolveNodes(raw) {
+  // Priority 1 — explicit collectedNodes array saved by commands.js
+  if (Array.isArray(raw.collectedNodes) && raw.collectedNodes.length > 0) {
+    return raw.collectedNodes;
+  }
+  // Priority 2 — keys of nodes object
+  var nodeKeys = Object.keys(raw.nodes || {});
+  return nodeKeys;
+}
+
+// ────────────────────────────────────────────────────────────
 //  GET /api/snapshots
-//  Returns array of snapshot metadata objects — newest first
 // ────────────────────────────────────────────────────────────
 router.get('/', function (req, res) {
   try {
@@ -105,30 +101,30 @@ router.get('/', function (req, res) {
         var filePath = path.join(SNAPSHOT_DIR, filename);
         var stat     = fs.statSync(filePath);
 
-        var commands  = [];
-        var timestamp = '';
-        var nodeCount = 0;
+        var commands       = [];
+        var collectedNodes = [];
+        var timestamp      = '';
+        var apic           = '';
 
         try {
-          var raw  = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-
-          // ── Resolve commands using all fallback strategies ──
-          commands  = resolveCommands(raw, filename);
-          timestamp = raw.timestamp || '';
-          nodeCount = Object.keys(raw.nodes || {}).length;
-
-        } catch (parseErr) {
-          // Malformed JSON — skip silently
-          console.warn('[snapshots] Could not parse:', filename, parseErr.message);
+          var raw        = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          commands       = resolveCommands(raw, filename);
+          collectedNodes = resolveNodes(raw);
+          timestamp      = raw.timestamp || '';
+          apic           = raw.apic      || '';
+        } catch (e) {
+          console.warn('[snapshots] Could not parse:', filename, e.message);
         }
 
         return {
-          filename:  filename,
-          commands:  commands,      // always an array
-          timestamp: timestamp,
-          nodeCount: nodeCount,
-          sizeBytes: stat.size,
-          created:   stat.birthtime.toISOString()
+          filename:       filename,
+          commands:       commands,
+          collectedNodes: collectedNodes,   // ← node IDs to show as tags
+          nodeCount:      collectedNodes.length,
+          timestamp:      timestamp,
+          apic:           apic,
+          sizeBytes:      stat.size,
+          created:        stat.birthtime.toISOString()
         };
       })
       .sort(function (a, b) {
@@ -146,7 +142,6 @@ router.get('/', function (req, res) {
 
 // ────────────────────────────────────────────────────────────
 //  GET /api/snapshots/:filename
-//  Load and return the full content of one snapshot
 // ────────────────────────────────────────────────────────────
 router.get('/:filename', function (req, res) {
   var filename = req.params.filename;
@@ -164,13 +159,15 @@ router.get('/:filename', function (req, res) {
   }
 
   try {
-    var raw  = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    var raw = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
-    // ── Normalise commands field before returning ───────────
-    // Ensures compare.html always gets a commands array
-    // regardless of the snapshot format on disk
+    // Normalise fields before returning
     if (!Array.isArray(raw.commands) || raw.commands.length === 0) {
       raw.commands = resolveCommands(raw, filename);
+    }
+
+    if (!Array.isArray(raw.collectedNodes) || raw.collectedNodes.length === 0) {
+      raw.collectedNodes = resolveNodes(raw);
     }
 
     res.json(raw);
@@ -205,14 +202,13 @@ router.delete('/:filename', function (req, res) {
     res.json({ success: true, deleted: filename });
   } catch (err) {
     res.status(500).json({
-      error: 'Failed to delete snapshot: ' + err.message
+      error: 'Failed to delete: ' + err.message
     });
   }
 });
 
 // ────────────────────────────────────────────────────────────
 //  POST /api/snapshots/export
-//  Bundle selected snapshots into a downloadable .tar file
 // ────────────────────────────────────────────────────────────
 router.post('/export', function (req, res) {
   var files = req.body.files;
@@ -223,7 +219,6 @@ router.post('/export', function (req, res) {
     });
   }
 
-  // Validate filenames
   var invalid = files.filter(function (f) {
     return f.includes('..') || f.includes('/');
   });
@@ -256,19 +251,15 @@ router.post('/export', function (req, res) {
         error: 'tar creation failed: ' + err.message
       });
     }
-
-    res.download(tarPath, tarName, function (downloadErr) {
+    res.download(tarPath, tarName, function (dlErr) {
       try { fs.unlinkSync(tarPath); } catch (e) { /* ignore */ }
-      if (downloadErr) {
-        console.error('[snapshots] Download error:', downloadErr.message);
-      }
+      if (dlErr) console.error('[snapshots] Download error:', dlErr.message);
     });
   });
 });
 
 // ────────────────────────────────────────────────────────────
 //  POST /api/snapshots/import
-//  Extract an uploaded .tar into the snapshot store
 // ────────────────────────────────────────────────────────────
 router.post('/import', upload.single('snapshotFile'), function (req, res) {
   if (!req.file) {
@@ -303,9 +294,7 @@ router.post('/import', upload.single('snapshotFile'), function (req, res) {
 
 // ── Multer error handler ──────────────────────────────────────
 router.use(function (err, _req, res, _next) {
-  if (err) {
-    res.status(400).json({ error: err.message });
-  }
+  if (err) res.status(400).json({ error: err.message });
 });
 
 module.exports = router;

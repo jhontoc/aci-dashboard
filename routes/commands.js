@@ -1,10 +1,10 @@
 'use strict';
 
-var express      = require('express');
-var spawn        = require('child_process').spawn;
-var path         = require('path');
-var fs           = require('fs');
-var router       = express.Router();
+var express  = require('express');
+var spawn    = require('child_process').spawn;
+var path     = require('path');
+var fs       = require('fs');
+var router   = express.Router();
 
 var SNAPSHOT_DIR = path.join(__dirname, '../data/snapshots');
 
@@ -14,27 +14,45 @@ var SCRIPT_MAP = {
   show_interface_status: path.join(__dirname, '../scripts/aci_show_interface_status.py')
 };
 
-
+// ────────────────────────────────────────────────────────────
+//  sanitiseProxy
+// ────────────────────────────────────────────────────────────
 function sanitiseProxy(val) {
   if (val === null || val === undefined) return null;
   if (typeof val !== 'string')           return null;
-
   var trimmed = val.trim();
   if (trimmed === '' || trimmed === 'null') return null;
-
   return trimmed;
 }
 
 // ────────────────────────────────────────────────────────────
-//  runScript — spawn one Python script, collect stdout/stderr
-//
-//  proxyYaml must already be sanitised (null or valid path)
-//  before this function is called.
+//  Helper — sanitise APIC IP for use in filename
+//  Replaces dots and special chars with hyphens
+//  e.g. "169.25.204.52" → "169-25-204-52"
 // ────────────────────────────────────────────────────────────
-function runScript(scriptPath, apicIp, username, password, nodeIds, apiPort, proxyYaml) {
+function sanitiseIpForFilename(ip) {
+  if (!ip) return 'unknown';
+  return String(ip)
+    .trim()
+    .replace(/[^a-zA-Z0-9]/g, '-')   // replace dots, colons etc
+    .replace(/-+/g, '-')              // collapse multiple dashes
+    .replace(/^-|-$/g, '');           // trim leading/trailing dashes
+}
+
+// ────────────────────────────────────────────────────────────
+//  runScript — spawn one Python script, collect stdout/stderr
+// ────────────────────────────────────────────────────────────
+function runScript(
+  scriptPath,
+  apicIp,
+  username,
+  password,
+  nodeIds,
+  apiPort,
+  proxyYaml
+) {
   return new Promise(function (resolve, reject) {
 
-    // ── Build argument list ─────────────────────────────────
     var args = [
       scriptPath,
       '--apic',  apicIp,
@@ -44,8 +62,6 @@ function runScript(scriptPath, apicIp, username, password, nodeIds, apiPort, pro
       '--port',  apiPort || '443'
     ];
 
-    // Only append --proxy when a valid path is provided
-    // proxyYaml is guaranteed null or a non-empty string here
     if (proxyYaml) {
       args.push('--proxy', proxyYaml);
     }
@@ -54,8 +70,12 @@ function runScript(scriptPath, apicIp, username, password, nodeIds, apiPort, pro
     var stdoutBuf = '';
     var stderrBuf = '';
 
-    proc.stdout.on('data', function (chunk) { stdoutBuf += chunk.toString(); });
-    proc.stderr.on('data', function (chunk) { stderrBuf += chunk.toString(); });
+    proc.stdout.on('data', function (chunk) {
+      stdoutBuf += chunk.toString();
+    });
+    proc.stderr.on('data', function (chunk) {
+      stderrBuf += chunk.toString();
+    });
 
     proc.on('close', function (code) {
       resolve({ stdoutBuf: stdoutBuf, stderrBuf: stderrBuf, code: code });
@@ -75,28 +95,33 @@ router.post('/run', function (req, res) {
   var nodeIds  = req.body.nodeIds;
   var commands = req.body.commands;
   var apiPort  = req.body.apiPort || '443';
-
-  // ── Sanitise proxy value — the key fix ───────────────────
-  // Regardless of what the frontend sends (null, "", "null", path)
-  // this resolves to either null or a valid path string
   var proxyYaml = sanitiseProxy(req.body.proxyYaml);
 
-  // ── Validation ────────────────────────────────────────────
-  if (!apicIp || !username || !password) {
-    return res.status(400).json({
-      error: 'apicIp, username, and password are required.'
-    });
-  }
+  // ── Detailed validation ───────────────────────────────────
+  var validationErrors = [];
 
+  if (!apicIp || typeof apicIp !== 'string' || apicIp.trim() === '') {
+    validationErrors.push('apicIp is missing or empty.');
+  }
+  if (!username || typeof username !== 'string' || username.trim() === '') {
+    validationErrors.push('username is missing or empty.');
+  }
+  if (!password || typeof password !== 'string' || password.trim() === '') {
+    validationErrors.push('password is missing or empty.');
+  }
   if (!Array.isArray(nodeIds) || nodeIds.length === 0) {
-    return res.status(400).json({
-      error: 'nodeIds must be a non-empty array.'
-    });
+    validationErrors.push(
+      'nodeIds must be a non-empty array. Got: ' + JSON.stringify(nodeIds)
+    );
+  }
+  if (!Array.isArray(commands) || commands.length === 0) {
+    validationErrors.push('commands must be a non-empty array.');
   }
 
-  if (!Array.isArray(commands) || commands.length === 0) {
+  if (validationErrors.length > 0) {
     return res.status(400).json({
-      error: 'commands must be a non-empty array.'
+      error:   'Validation failed',
+      details: validationErrors
     });
   }
 
@@ -109,12 +134,9 @@ router.post('/run', function (req, res) {
     });
   }
 
-  // ── Proxy path validation — only when a path was given ───
-  // If proxyYaml is null we skip this check entirely
-  // Direct connection is assumed when proxyYaml is null
   if (proxyYaml !== null && !fs.existsSync(proxyYaml)) {
     return res.status(400).json({
-      error: 'Proxy YAML file not found at path: ' + proxyYaml
+      error: 'Proxy YAML file not found: ' + proxyYaml
     });
   }
 
@@ -125,7 +147,6 @@ router.post('/run', function (req, res) {
   res.setHeader('X-Accel-Buffering', 'no');
   res.flushHeaders();
 
-  // ── SSE send helper ───────────────────────────────────────
   function send(data) {
     var payload = typeof data === 'object'
       ? JSON.stringify(data)
@@ -133,7 +154,6 @@ router.post('/run', function (req, res) {
     res.write('data: ' + payload + '\n\n');
   }
 
-  // ── Log connection mode to stream ─────────────────────────
   send({
     status:    'started',
     commands:  commands,
@@ -141,30 +161,30 @@ router.post('/run', function (req, res) {
     apiPort:   apiPort,
     proxy:     proxyYaml
       ? 'Via proxy YAML: ' + proxyYaml
-      : 'Direct connection (no proxy)'    // ← clear confirmation
+      : 'Direct connection (no proxy)'
   });
 
-  // ── Unified snapshot structure ────────────────────────────
+  // ── Unified snapshot ──────────────────────────────────────
   var now      = new Date();
   var snapshot = {
     timestamp: now.toISOString(),
     commands:  commands,
     apic:      apicIp,
     apiPort:   apiPort,
-    proxy:     proxyYaml,    // null stored in snapshot when no proxy
+    proxy:     proxyYaml,
     nodes:     {}
   };
 
+  // Pre-populate node keys from requested IDs
   nodeIds.forEach(function (id) {
     snapshot.nodes[id] = {};
   });
 
-  // ── Run each command sequentially ─────────────────────────
+  // ── Run commands sequentially ─────────────────────────────
   var cmdIndex = 0;
 
   function runNext() {
     if (cmdIndex >= commands.length) {
-      // All commands done — save snapshot
       saveSnapshot();
       return;
     }
@@ -186,35 +206,54 @@ router.post('/run', function (req, res) {
       password,
       nodeIds,
       apiPort,
-      proxyYaml       // null → no --proxy arg appended in runScript()
+      proxyYaml
     )
     .then(function (result) {
       var stdoutBuf = result.stdoutBuf;
       var stderrBuf = result.stderrBuf;
       var code      = result.code;
 
-      // Forward stderr to stream
       if (stderrBuf.trim()) {
         var stderrLines = stderrBuf.split('\n').filter(Boolean);
         for (var si = 0; si < stderrLines.length; si++) {
-          send({ status: 'stderr', command: cmd, message: stderrLines[si].trim() });
+          send({
+            status:  'stderr',
+            command: cmd,
+            message: stderrLines[si].trim()
+          });
         }
       }
 
-      // Parse stdout lines
       var lines = stdoutBuf.split('\n').filter(Boolean);
+
       for (var li = 0; li < lines.length; li++) {
         var trimmed = lines[li].trim();
-        send(trimmed);  // forward raw to SSE terminal
+        send(trimmed);
 
         try {
           var parsed = JSON.parse(trimmed);
-          // Merge node data into unified snapshot
+
           if (parsed.node && parsed.data) {
+            // Create node key if it does not exist
+            if (!snapshot.nodes[parsed.node]) {
+              snapshot.nodes[parsed.node] = {};
+              send({
+                status:  'node_key_created',
+                node:    parsed.node,
+                message: 'Node ' + parsed.node + ' added to snapshot'
+              });
+            }
+
             snapshot.nodes[parsed.node][cmd] = parsed.data;
+
+            send({
+              status:  'node_collected',
+              command: cmd,
+              node:    parsed.node
+            });
           }
         } catch (e) {
-          // Non-JSON progress line — already forwarded above
+          // Non-JSON progress line
         }
       }
 
@@ -224,7 +263,6 @@ router.post('/run', function (req, res) {
         code:    code
       });
 
-      // Run next command
       runNext();
     })
     .catch(function (spawnErr) {
@@ -233,33 +271,68 @@ router.post('/run', function (req, res) {
         command: cmd,
         message: spawnErr.message
       });
-      // Continue to next command even on spawn error
       runNext();
     });
   }
 
   // ── Save unified snapshot ─────────────────────────────────
   function saveSnapshot() {
+
+    // Remove empty pre-populated node keys
+    var nodeKeys = Object.keys(snapshot.nodes);
+    for (var ni = 0; ni < nodeKeys.length; ni++) {
+      var nk = nodeKeys[ni];
+      if (Object.keys(snapshot.nodes[nk]).length === 0) {
+        send({
+          status:  'node_skipped',
+          node:    nk,
+          message: 'Node ' + nk + ' returned no data — removed'
+        });
+        delete snapshot.nodes[nk];
+      }
+    }
+
+    var collectedNodes = Object.keys(snapshot.nodes);
+
+    if (collectedNodes.length === 0) {
+      send({
+        status:  'save_error',
+        message: 'No node data collected — snapshot not saved.'
+      });
+      res.write('data: [ALL_COMPLETE]\n\n');
+      res.end();
+      return;
+    }
+
+    // ── Store collected node IDs in snapshot for display ──
+    snapshot.collectedNodes = collectedNodes;
+
     try {
       if (!fs.existsSync(SNAPSHOT_DIR)) {
         fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
       }
 
-      var ts       = now.toISOString()
+      // ── Build filename ────────────────────────────────────
+      // Format: snapshot_{timestamp}_{apic-ip}.json
+      // Example: snapshot_2026-07-09T04_04_19_553Z_169-25-204-52.json
+      var ts        = now.toISOString()
         .replace(/:/g, '_')
         .replace(/\./g, '_');
-      var filename = 'snapshot_' + ts + '.json';
-      var outPath  = path.join(SNAPSHOT_DIR, filename);
+
+      var apicSlug  = sanitiseIpForFilename(apicIp);
+      var filename  = 'snapshot_' + ts + '_' + apicSlug + '.json';
+      var outPath   = path.join(SNAPSHOT_DIR, filename);
 
       fs.writeFileSync(outPath, JSON.stringify(snapshot, null, 2));
 
       send({
-        status:         'snapshot_saved',
-        snapshot_saved: filename,
-        path:           outPath,
-        commands:       commands,
-        nodeCount:      nodeIds.length,
-        proxy:          proxyYaml ? proxyYaml : 'none'
+        status:          'snapshot_saved',
+        snapshot_saved:  filename,
+        path:            outPath,
+        commands:        commands,
+        collectedNodes:  collectedNodes,
+        nodeCount:       collectedNodes.length,
+        proxy:           proxyYaml ? proxyYaml : 'none'
       });
 
     } catch (saveErr) {
@@ -273,12 +346,10 @@ router.post('/run', function (req, res) {
     res.end();
   }
 
-  // ── Start execution ───────────────────────────────────────
   runNext();
 
-  // ── Handle client disconnect ──────────────────────────────
   req.on('close', function () {
-    console.log('[commands] Client disconnected — SSE stream closed.');
+    console.log('[commands] Client disconnected.');
   });
 });
 
